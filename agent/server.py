@@ -97,5 +97,46 @@ def check_library_for_answer(question: str) -> Optional[str]:
     # Placeholder for RAG logic
     return None
 
+@mcp.tool()
+def launch_auto_quiz(session_id: str, topic: str = "general", difficulty: str = "medium") -> str:
+    """
+    Launches an AI-generated quiz for the session.
+    """
+    if not convex_client:
+        return "Error: Convex client not connected."
+        
+    try:
+        # Map generic difficulty to specific literal if needed, or rely on type checking
+        # api.quizzes.generateAndLaunchQuiz takes { sessionId, questionCount, difficulty }
+        
+        # We need to pass the ID as a string, Convex client handles serialization usually, 
+        # but pure string might need to be wrapped if strictly typed on client side? 
+        # The python client usually handles "string" -> ID coercion for arguments.
+        
+        result = convex_client.mutation("quizzes:generateAndLaunchQuiz", {
+            "sessionId": session_id,
+            "difficulty": difficulty if difficulty in ["easy", "medium", "hard"] else "medium"
+        })
+        return f"Quiz launched successfully! scheduled={result.get('scheduled')}"
+    except Exception as e:
+        return f"Failed to launch quiz: {str(e)}"
+
+@mcp.tool()
+def submit_ai_answer(question_id: str, answer: str) -> str:
+    """
+    Submits an AI-generated answer to a specific question.
+    """
+    if not convex_client:
+         return "Error: Convex client not connected."
+
+    try:
+        convex_client.mutation("questions:saveAnswer", {
+            "questionId": question_id,
+            "answer": answer
+        })
+        return "Answer submitted successfully."
+    except Exception as e:
+        return f"Failed to submit answer: {str(e)}"
+
 if __name__ == "__main__":
     mcp.run()
