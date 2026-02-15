@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", sans-serif;
+
+  /* Backgrounds */
+  --color-lavender-bg: #E0DEF7;
+  /* Main page background */
+  --color-milk: #FDFBFF;
+  /* Card background */
+
+  /* Brand Colors */
+  --color-coral: #FF6B4A;
+  --color-coral-dark: #E85D3F;
+  --color-mustard: #FCD34D;
+  --color-soft-purple: #C4B5FD;
+  --color-deep-purple: #8B5CF6;
+
+  /* Text */
+  --color-ink: #111827;
+
+  /* Utilities */
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* Shadows specific to this art style (hard shadows) */
+  --shadow-comic: 4px 4px 0px 0px #111827;
+  --shadow-comic-hover: 6px 6px 0px 0px #111827;
+  --shadow-comic-sm: 2px 2px 0px 0px #111827;
+}
+
+body {
+  @apply m-0 bg-lavender-bg text-ink font-sans;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar for playful feel */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C4B5FD;
+  border-radius: 10px;
+  border: 3px solid #E0DEF7;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5CF6;
+}
+
+/* Base button styles we can reuse */
+.btn-primary {
+  @apply bg-coral text-white font-bold px-6 py-3 rounded-xl border-2 border-ink shadow-comic transition-all duration-200 hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-1 active:translate-y-1 active:shadow-none;
+}
+
+/* Reusable animation class for any element */
+.btn-press {
+  @apply transition-all duration-200 hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-1 active:translate-y-1 active:shadow-none;
+}
+
+.card-base {
+  @apply bg-milk border-2 border-ink rounded-2xl shadow-comic;
+}
