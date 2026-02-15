@@ -5,6 +5,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
+import logo from '../logo.png'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -18,6 +19,7 @@ export const Route = createRootRoute({
       },
       {
         title: 'Clarifyd',
+        title: 'Clarifyd',
       },
     ],
     links: [
@@ -27,8 +29,8 @@ export const Route = createRootRoute({
       },
       {
         rel: 'icon',
-        type: 'image/svg+xml',
-        href: '/favicon.svg',
+        type: 'image/png',
+        href: logo,
       },
     ],
   }),

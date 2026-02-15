@@ -34,6 +34,11 @@ Keep it concise (3-4 sentences max) and supportive in tone.`,
 Translate the student's question into English.
 Detect the original language.
 Output JSON: { "translatedText": "...", "originalLanguage": "..." }`,
+
+  translate_response: `You are a professional translator.
+Translate the educational response into the target language.
+Ensure the tone remains helpful and encouraging.
+Output JSON: { "translatedText": "..." }`,
 };
 
 // ==========================================
@@ -76,6 +81,12 @@ export const GENERATION_CONFIGS: Record<
   translate_question: {
     temperature: 0.3,
     maxOutputTokens: 1000,
+    thinkingBudget: 0,
+    responseFormat: "json",
+  },
+  translate_response: {
+    temperature: 0.3,
+    maxOutputTokens: 2000,
     thinkingBudget: 0,
     responseFormat: "json",
   },
@@ -207,10 +218,19 @@ export const FALLBACK_RESPONSES: Record<AIFeatureType, string> = {
   lost_summary:
     "The lecture has been covering important material. Please ask your teacher for a quick summary of what was just discussed.",
   translate_question: "Translation unavailable.",
+  translate_response: "Translation unavailable.",
 };
 
 export function buildTranslatePrompt(questionText: string): string {
   return `Student Question: "${questionText}"
 
 Translate this question into English. If it is already in English, return it as is and set originalLanguage to "English".`;
+}
+
+export function buildTranslateResponsePrompt(responseText: string, targetLanguage: string): string {
+  return `Response to Translate: "${responseText}"
+
+Target Language: "${targetLanguage}"
+
+Translate the response above into the target language.`;
 }

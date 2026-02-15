@@ -9,7 +9,8 @@ export type AIFeatureType =
   | "quiz_generation"
   | "question_summary"
   | "lost_summary"
-  | "translate_question";
+  | "translate_question"
+  | "translate_response";
 
 // ==========================================
 // Context Types
