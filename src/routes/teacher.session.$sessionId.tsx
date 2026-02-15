@@ -53,6 +53,7 @@ function TeacherSessionPage() {
   const generateAndLaunchQuiz = useMutation(api.quizzes.generateAndLaunchQuiz);
   const closeQuiz = useMutation(api.quizzes.closeQuiz);
   const endSession = useMutation(api.sessions.endSession);
+  const setZoomMeeting = useMutation(api.sessions.setZoomMeeting);
 
   const [copied, setCopied] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
@@ -63,8 +64,47 @@ function TeacherSessionPage() {
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [zoomInput, setZoomInput] = useState("");
+  const [zoomImportStatus, setZoomImportStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [zoomImportMessage, setZoomImportMessage] = useState("");
 
   const generateSessionNotesAction = useAction(api.ai.service.generateSessionNotes);
+  const importZoomTranscriptAction = useAction(api.zoom.importZoomTranscript);
+
+  const handleSaveZoomMeeting = async () => {
+    if (!zoomInput.trim()) return;
+    try {
+      await setZoomMeeting({
+        sessionId: sessionId as Id<"sessions">,
+        zoomMeetingIdOrLink: zoomInput.trim(),
+      });
+      setZoomInput("");
+      setZoomImportStatus("idle");
+      setZoomImportMessage("");
+    } catch (e: any) {
+      alert(e?.message || "Failed to save Zoom meeting ID.");
+    }
+  };
+
+  const handleImportZoomTranscript = async () => {
+    setZoomImportStatus("loading");
+    setZoomImportMessage("");
+    try {
+      const result = await importZoomTranscriptAction({
+        sessionId: sessionId as Id<"sessions">,
+      });
+      if (result.success && "linesImported" in result) {
+        setZoomImportStatus("success");
+        setZoomImportMessage(`Imported ${result.linesImported} transcript lines.`);
+      } else {
+        setZoomImportStatus("error");
+        setZoomImportMessage("error" in result ? result.error : "Import failed.");
+      }
+    } catch (e: any) {
+      setZoomImportStatus("error");
+      setZoomImportMessage(e?.message || "Import failed.");
+    }
+  };
 
   const handleDownloadNotes = async () => {
     setIsGeneratingNotes(true);
@@ -364,6 +404,57 @@ function TeacherSessionPage() {
                 <h2 className="text-xl font-black">Live Transcription</h2>
               </div>
               <TranscriptionControls sessionId={sessionId as Id<"sessions">} />
+            </div>
+
+            {/* Zoom meeting – import transcript from cloud recording (remote class) */}
+            <div className="bg-white border-2 border-ink rounded-[2rem] p-6 shadow-comic">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-coral/20 border-2 border-ink rounded-xl flex items-center justify-center">
+                  <span className="text-xl">📹</span>
+                </div>
+                <h2 className="text-xl font-black">Zoom meeting</h2>
+              </div>
+              <p className="text-slate-500 text-sm mb-4">
+                Paste your Zoom meeting ID or join link to import the meeting transcript (from cloud recording).
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 mb-3">
+                <input
+                  type="text"
+                  value={zoomInput}
+                  onChange={(e) => setZoomInput(e.target.value)}
+                  placeholder={session?.zoomMeetingId ? `Current: ${session.zoomMeetingId}` : "e.g. 12345678901 or zoom.us/j/12345678901"}
+                  className="flex-1 px-4 py-3 border-2 border-ink rounded-xl text-ink placeholder-slate-400 outline-none focus:border-coral font-medium"
+                />
+                <button
+                  onClick={handleSaveZoomMeeting}
+                  disabled={!zoomInput.trim()}
+                  className="px-4 py-3 rounded-xl border-2 border-ink bg-ink text-white font-bold hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed btn-press shrink-0"
+                >
+                  Save
+                </button>
+              </div>
+              <button
+                onClick={handleImportZoomTranscript}
+                disabled={zoomImportStatus === "loading" || !session?.zoomMeetingId}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl border-2 border-ink bg-white font-bold text-ink shadow-comic-sm hover:bg-mustard/20 btn-press disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {zoomImportStatus === "loading" ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Importing…
+                  </>
+                ) : (
+                  "Import transcript from Zoom"
+                )}
+              </button>
+              {session?.zoomMeetingId && !zoomInput && (
+                <p className="text-slate-500 text-xs mt-2">Meeting ID: {session.zoomMeetingId}</p>
+              )}
+              {zoomImportMessage && (
+                <p className={clsx("text-sm mt-2 font-medium", zoomImportStatus === "success" ? "text-green-600" : "text-coral")}>
+                  {zoomImportMessage}
+                </p>
+              )}
             </div>
 
             {/* Tools Grid */}

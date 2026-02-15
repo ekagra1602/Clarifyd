@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // Append a new transcript line (append-only for real-time performance)
@@ -117,5 +117,26 @@ export const getTranscriptCount = query({
       .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
       .collect();
     return lines.length;
+  },
+});
+
+// Internal: batch-insert transcript lines (used by Zoom transcript import action)
+export const insertTranscriptLinesBatch = internalMutation({
+  args: {
+    sessionId: v.id("sessions"),
+    lines: v.array(v.object({ text: v.string(), createdAt: v.number() })),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    for (const line of args.lines) {
+      if (!line.text.trim()) continue;
+      await ctx.db.insert("transcriptLines", {
+        sessionId: args.sessionId,
+        text: line.text.trim(),
+        createdAt: line.createdAt,
+      });
+    }
+    return { inserted: args.lines.filter((l) => l.text.trim()).length };
   },
 });

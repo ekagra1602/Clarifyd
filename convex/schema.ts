@@ -19,6 +19,7 @@ export default defineSchema({
     createdAt: v.number(),
     contextText: v.optional(v.string()), // Uploaded slides/context for AI
     activeQuizId: v.optional(v.id("quizzes")), // Currently active quiz
+    zoomMeetingId: v.optional(v.string()), // Zoom meeting ID for transcript import (numeric ID from link)
 
   }).index("by_code", ["code"]),
 

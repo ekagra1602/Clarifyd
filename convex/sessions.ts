@@ -1,4 +1,4 @@
-import { mutation, query, internalMutation, internalAction } from "./_generated/server";
+import { mutation, query, internalMutation, internalAction, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { FALLBACK_RESPONSES } from "./ai/service";
@@ -307,6 +307,50 @@ export const uploadSlides = mutation({
     await ctx.db.patch(args.sessionId, {
       contextText: args.slidesText,
     });
+  },
+});
+
+// Parse Zoom meeting ID from link or raw ID (e.g. zoom.us/j/12345678901 or 12345678901)
+export function parseZoomMeetingId(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const numericOnly = trimmed.replace(/\D/g, "");
+  if (numericOnly.length >= 9 && numericOnly.length <= 11) return numericOnly;
+  const match = trimmed.match(/zoom\.us\/[a-z]+\/(\d{9,11})/i) ?? trimmed.match(/(\d{9,11})/);
+  return match ? match[1]! : null;
+}
+
+// Set Zoom meeting ID or link for transcript import (teacher)
+export const setZoomMeeting = mutation({
+  args: {
+    sessionId: v.id("sessions"),
+    zoomMeetingIdOrLink: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) throw new Error("Session not found");
+    const meetingId = parseZoomMeetingId(args.zoomMeetingIdOrLink);
+    if (!meetingId) throw new Error("Invalid Zoom meeting ID or link. Use a 9–11 digit ID or a zoom.us/j/... link.");
+    await ctx.db.patch(args.sessionId, { zoomMeetingId: meetingId });
+    return { zoomMeetingId: meetingId };
+  },
+});
+
+// Internal query: get session zoom meeting ID (for Zoom import action)
+export const getSessionZoomMeetingInternal = internalQuery({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    return session ? { zoomMeetingId: session.zoomMeetingId ?? null } : null;
+  },
+});
+
+// Internal query: get session zoom meeting ID (for Zoom import action)
+export const getSessionZoomMeetingInternal = internalQuery({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId);
+    return session ? { zoomMeetingId: session.zoomMeetingId ?? null } : null;
   },
 });
 
