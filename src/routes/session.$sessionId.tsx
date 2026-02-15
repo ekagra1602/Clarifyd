@@ -309,6 +309,8 @@ function StudentSessionPage() {
             studentId={studentId}
             questions={recentQuestions ?? []}
             onClose={() => setIsQAOpen(false)}
+            instructorName={session.instructorName}
+            instructorAvatar={session.instructorAvatar}
           />
         )}
 
@@ -469,11 +471,15 @@ function TranscriptView({
   );
 }
 
+import { AvatarPreview } from "../components/AvatarPreview";
+
 function ChatSidebar({
   sessionId,
   studentId,
   questions,
   onClose,
+  instructorName,
+  instructorAvatar
 }: {
   sessionId: Id<"sessions">;
   studentId: string;
@@ -484,6 +490,8 @@ function ChatSidebar({
     createdAt: number;
   }[];
   onClose: () => void;
+  instructorName?: string;
+  instructorAvatar?: any;
 }) {
   const [input, setInput] = useState("");
   const [isAsking, setIsAsking] = useState(false);
@@ -527,8 +535,14 @@ function ChatSidebar({
         {/* Header */}
         <div className="p-4 border-b-2 border-ink bg-soft-purple/10 flex items-center justify-between">
           <h3 className="font-black text-xl flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-soft-purple fill-current" />
-            AI Assistant
+            {instructorAvatar ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-ink bg-white">
+                <AvatarPreview avatar={instructorAvatar} size="sm" />
+              </div>
+            ) : (
+              <Sparkles className="w-5 h-5 text-soft-purple fill-current" />
+            )}
+            {instructorName || "AI Assistant"}
           </h3>
           <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-colors group">
             <div className="w-5 h-5 relative flex items-center justify-center">
@@ -558,8 +572,17 @@ function ChatSidebar({
                 {/* AI Answer */}
                 <div className="flex justify-start">
                   {q.answer ? (
-                    <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%]">
-                      <Sparkles className="w-3 h-3 text-soft-purple mb-1 fill-current" />
+                    <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 mb-1 opacity-70">
+                        {instructorAvatar ? (
+                          <div className="w-4 h-4 rounded-full overflow-hidden border border-ink bg-white">
+                            <AvatarPreview avatar={instructorAvatar} size="sm" />
+                          </div>
+                        ) : (
+                          <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
+                        )}
+                        <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
+                      </div>
                       {q.answer}
                     </div>
                   ) : (

@@ -27,7 +27,17 @@ const MAX_CODE_GENERATION_ATTEMPTS = 10;
 
 // Create a new lecture session
 export const createSession = mutation({
-  args: { roomName: v.optional(v.string()) },
+  args: {
+    roomName: v.optional(v.string()),
+    instructorName: v.optional(v.string()),
+    instructorAvatar: v.optional(v.object({
+      hairStyle: v.optional(v.string()),
+      hairColor: v.optional(v.string()),
+      eyes: v.optional(v.string()),
+      skinTone: v.optional(v.string()),
+      accessory: v.optional(v.string()),
+    })),
+  },
   handler: async (ctx, args) => {
     // Generate a unique join code with collision detection
     let code: string;
@@ -55,6 +65,8 @@ export const createSession = mutation({
     const sessionId = await ctx.db.insert("sessions", {
       code,
       roomName: args.roomName,
+      instructorName: args.instructorName,
+      instructorAvatar: args.instructorAvatar,
       status: "live",
       createdAt: Date.now(),
     });
