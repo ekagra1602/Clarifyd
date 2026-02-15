@@ -87,9 +87,7 @@ export const joinSession = mutation({
       throw new Error("Session not found");
     }
 
-    if (session.status !== "live") {
-      throw new Error("Session has ended");
-    }
+
 
     // Generate a unique student ID
     const studentId = `student-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

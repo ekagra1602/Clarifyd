@@ -29,6 +29,11 @@ A student has indicated they are lost during the lecture.
 Provide a brief, encouraging summary of what was just covered.
 Focus on the key concepts and offer a clear path forward.
 Keep it concise (3-4 sentences max) and supportive in tone.`,
+
+  translate_question: `You are a professional translator.
+Translate the student's question into English.
+Detect the original language.
+Output JSON: { "translatedText": "...", "originalLanguage": "..." }`,
 };
 
 // ==========================================
@@ -67,6 +72,12 @@ export const GENERATION_CONFIGS: Record<
     maxOutputTokens: 2000,
     thinkingBudget: 1024,
     responseFormat: "text",
+  },
+  translate_question: {
+    temperature: 0.3,
+    maxOutputTokens: 1000,
+    thinkingBudget: 0,
+    responseFormat: "json",
   },
 };
 
@@ -195,4 +206,11 @@ export const FALLBACK_RESPONSES: Record<AIFeatureType, string> = {
   question_summary: "Unable to analyze questions at this time.",
   lost_summary:
     "The lecture has been covering important material. Please ask your teacher for a quick summary of what was just discussed.",
+  translate_question: "Translation unavailable.",
 };
+
+export function buildTranslatePrompt(questionText: string): string {
+  return `Student Question: "${questionText}"
+
+Translate this question into English. If it is already in English, return it as is and set originalLanguage to "English".`;
+}

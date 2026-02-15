@@ -27,6 +27,7 @@ export const COMPRESSION_CONFIGS: Record<AIFeatureType, CompressionConfig> = {
   quiz_generation: { enabled: true, aggressiveness: 0.7 },
   question_summary: { enabled: true, aggressiveness: 0.7 },
   lost_summary: { enabled: true, aggressiveness: 0.7 },
+  translate_question: { enabled: true, aggressiveness: 0.7 },
 };
 
 // ==========================================

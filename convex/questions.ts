@@ -26,6 +26,22 @@ export const askQuestion = mutation({
       createdAt: Date.now(),
     });
 
+
+
+    // Check student language preference
+    const student = await ctx.db
+      .query("students")
+      .withIndex("by_session_student", (q) =>
+        q.eq("sessionId", args.sessionId).eq("studentId", args.studentId)
+      )
+      .first();
+
+    if (student?.languagePreference && student.languagePreference !== "English") {
+      await ctx.scheduler.runAfter(0, internal.questions.translateQuestion, {
+        questionId,
+      });
+    }
+
     // Schedule AI answer generation
     // DISABLED: External Python Agent now handles this
     // await ctx.scheduler.runAfter(0, internal.questions.generateAnswer, {
@@ -58,6 +74,21 @@ export const saveAnswerInternal = internalMutation({
   handler: async (ctx, args) => {
     await ctx.db.patch(args.questionId, {
       answer: args.answer,
+    });
+  },
+
+});
+
+export const saveTranslationInternal = internalMutation({
+  args: {
+    questionId: v.id("questions"),
+    translatedQuestion: v.string(),
+    originalLanguage: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.questionId, {
+      translatedQuestion: args.translatedQuestion,
+      originalLanguage: args.originalLanguage,
     });
   },
 });
@@ -110,6 +141,33 @@ export const generateAnswer = internalAction({
       questionId: args.questionId,
       answer,
     });
+  },
+});
+
+export const translateQuestion = internalAction({
+  args: {
+    questionId: v.id("questions"),
+  },
+  handler: async (ctx, args) => {
+    const question = await ctx.runQuery(internal.questions.getQuestionInternal, {
+      questionId: args.questionId,
+    });
+
+    if (!question) return;
+
+    const result = await ctx.runAction(internal.ai.service.callClaude, {
+      featureType: "translate_question",
+      sessionId: question.sessionId,
+      questionText: question.question,
+    });
+
+    if (result.success && result.translateResult) {
+      await ctx.runMutation(internal.questions.saveTranslationInternal, {
+        questionId: args.questionId,
+        translatedQuestion: result.translateResult.translatedText,
+        originalLanguage: result.translateResult.originalLanguage,
+      });
+    }
   },
 });
 
@@ -181,7 +239,8 @@ export const listRecentQuestions = query({
 
     // Filter by studentId if provided (private chat mode)
     // If not provided (teacher view), show all or handled by another query
-    const filteredQuestions = args.studentId 
+    // Teachers see all questions
+    const filteredQuestions = args.studentId
       ? questions.filter(q => q.studentId === args.studentId)
       : questions;
 

@@ -104,6 +104,8 @@ export default defineSchema({
     studentId: v.string(),
     question: v.string(),
     answer: v.optional(v.string()), // AI-generated answer
+    translatedQuestion: v.optional(v.string()), // English translation if original wasn't English
+    originalLanguage: v.optional(v.string()), // Original language if translated
     createdAt: v.number(),
   }).index("by_session", ["sessionId", "createdAt"]),
 

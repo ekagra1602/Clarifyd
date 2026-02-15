@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { TranscriptionControls } from "../components/TranscriptionControls";
 import { LeaderboardModal } from "../components/LeaderboardModal";
+import { StudentQuestionFeed } from "../components/StudentQuestionFeed";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
@@ -395,6 +396,7 @@ function TeacherSessionPage() {
               </button>
             </div>
 
+            <StudentQuestionFeed sessionId={sessionId as Id<"sessions">} />
           </div>
         </div>
       </div>
