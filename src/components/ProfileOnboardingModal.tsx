@@ -6,11 +6,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { AvatarPreview } from "./AvatarPreview";
 import {
-  HAIR_STYLES,
-  HAIR_COLORS,
-  EYES_OPTIONS,
-  SKIN_TONES,
-  ACCESSORIES,
+  DICEBEAR_STYLES,
   DEFAULT_AVATAR,
   type AvatarShape,
 } from "../lib/avatarOptions";
@@ -57,7 +53,7 @@ type ProfileForm = {
 
 const defaultForm: ProfileForm = {
   displayName: "",
-  avatar: { ...DEFAULT_AVATAR },
+  avatar: { style: DEFAULT_AVATAR.style, seed: "default" },
   accessibility: [],
   languagePreference: "en",
   learningPreference: ["step_by_step"],
@@ -89,7 +85,7 @@ export function ProfileOnboardingModal({
   studentId: string;
   initialProfile?: {
     displayName?: string | null;
-    avatar?: { hairStyle?: string; hairColor?: string; eyes?: string; skinTone?: string; accessory?: string } | null;
+    avatar?: { style?: string; seed?: string } | null;
     accessibility?: string[] | null;
     languagePreference?: string | null;
     learningPreference?: string[] | null;
@@ -107,11 +103,8 @@ export function ProfileOnboardingModal({
     return {
       displayName: initialProfile?.displayName ?? "",
       avatar: {
-        hairStyle: a?.hairStyle ?? DEFAULT_AVATAR.hairStyle,
-        hairColor: a?.hairColor ?? DEFAULT_AVATAR.hairColor,
-        eyes: a?.eyes ?? DEFAULT_AVATAR.eyes,
-        skinTone: a?.skinTone ?? DEFAULT_AVATAR.skinTone,
-        accessory: a?.accessory ?? DEFAULT_AVATAR.accessory,
+        style: a?.style ?? DEFAULT_AVATAR.style,
+        seed: a?.seed ?? `${studentId}-${Date.now()}`,
       },
       accessibility: initialProfile?.accessibility ?? [],
       languagePreference: initialProfile?.languagePreference ?? "en",
@@ -129,6 +122,13 @@ export function ProfileOnboardingModal({
 
   const setAvatar = (key: keyof AvatarShape, value: string) => {
     setForm((f) => ({ ...f, avatar: { ...f.avatar, [key]: value } }));
+  };
+
+  const shuffleAvatar = () => {
+    setForm((f) => ({
+      ...f,
+      avatar: { ...f.avatar, seed: `${Math.random().toString(36).slice(2)}-${Date.now()}` },
+    }));
   };
 
   const handleSave = async () => {
@@ -169,7 +169,7 @@ export function ProfileOnboardingModal({
         profileComplete: true,
         languagePreference: "en",
         learningPreference: ["step_by_step"],
-        avatar: defaultForm.avatar,
+        avatar: { style: DEFAULT_AVATAR.style, seed: studentId },
       });
       onSaved();
       onClose();
@@ -198,34 +198,6 @@ export function ProfileOnboardingModal({
         : [...f.learningPreference, id],
     }));
   };
-
-  const attrRow = (
-    label: string,
-    current: string,
-    options: readonly { id: string; label: string }[],
-    onPrev: () => void,
-    onNext: () => void
-  ) => (
-    <div className="flex items-center justify-between gap-2 py-1">
-      <button
-        type="button"
-        onClick={onPrev}
-        className="w-9 h-9 flex items-center justify-center rounded-xl border-2 border-ink bg-white shadow-comic-sm hover:bg-slate-50 btn-press"
-      >
-        <ChevronLeft className="w-5 h-5 text-ink" />
-      </button>
-      <span className="text-sm font-bold text-ink min-w-[80px] text-center">
-        {options.find((o) => o.id === current)?.label ?? current}
-      </span>
-      <button
-        type="button"
-        onClick={onNext}
-        className="w-9 h-9 flex items-center justify-center rounded-xl border-2 border-ink bg-white shadow-comic-sm hover:bg-slate-50 btn-press"
-      >
-        <ChevronRight className="w-5 h-5 text-ink" />
-      </button>
-    </div>
-  );
 
   return (
     <motion.div
@@ -259,47 +231,34 @@ export function ProfileOnboardingModal({
         </div>
 
         <div className="overflow-y-auto p-4 space-y-6 custom-scrollbar">
-          {/* Avatar */}
+          {/* Avatar (DiceBear - toggle style with arrows, no labels) */}
           <div>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Avatar</p>
             <div className="bg-slate-50 border-2 border-ink/20 rounded-xl p-4">
               <AvatarPreview avatar={form.avatar} />
-              <div className="grid grid-cols-1 gap-2 mt-4 max-w-xs mx-auto">
-                {attrRow(
-                  "Hair",
-                  form.avatar.hairStyle,
-                  HAIR_STYLES,
-                  () => setAvatar("hairStyle", prevOption(HAIR_STYLES, form.avatar.hairStyle)),
-                  () => setAvatar("hairStyle", cycleOption(HAIR_STYLES, form.avatar.hairStyle))
-                )}
-                {attrRow(
-                  "Color",
-                  form.avatar.hairColor,
-                  HAIR_COLORS,
-                  () => setAvatar("hairColor", prevOption(HAIR_COLORS, form.avatar.hairColor)),
-                  () => setAvatar("hairColor", cycleOption(HAIR_COLORS, form.avatar.hairColor))
-                )}
-                {attrRow(
-                  "Eyes",
-                  form.avatar.eyes,
-                  EYES_OPTIONS,
-                  () => setAvatar("eyes", prevOption(EYES_OPTIONS, form.avatar.eyes)),
-                  () => setAvatar("eyes", cycleOption(EYES_OPTIONS, form.avatar.eyes))
-                )}
-                {attrRow(
-                  "Skin",
-                  form.avatar.skinTone,
-                  SKIN_TONES,
-                  () => setAvatar("skinTone", prevOption(SKIN_TONES, form.avatar.skinTone)),
-                  () => setAvatar("skinTone", cycleOption(SKIN_TONES, form.avatar.skinTone))
-                )}
-                {attrRow(
-                  "Accessory",
-                  form.avatar.accessory,
-                  ACCESSORIES,
-                  () => setAvatar("accessory", prevOption(ACCESSORIES, form.avatar.accessory)),
-                  () => setAvatar("accessory", cycleOption(ACCESSORIES, form.avatar.accessory))
-                )}
+              <div className="flex items-center justify-center gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setAvatar("style", prevOption(DICEBEAR_STYLES, form.avatar.style))}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-ink bg-white shadow-comic-sm hover:bg-slate-50 btn-press"
+                  title="Previous style"
+                >
+                  <ChevronLeft className="w-5 h-5 text-ink" />
+                </button>
+                <button
+                  type="button"
+                  onClick={shuffleAvatar}
+                  className="py-2 px-4 rounded-xl border-2 border-ink bg-white font-bold text-ink text-sm shadow-comic-sm hover:bg-mustard/20 btn-press"
+                >
+                  Shuffle (new look)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAvatar("style", cycleOption(DICEBEAR_STYLES, form.avatar.style))}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-ink bg-white shadow-comic-sm hover:bg-slate-50 btn-press"
+                  title="Next style"
+                >
+                  <ChevronRight className="w-5 h-5 text-ink" />
+                </button>
               </div>
             </div>
           </div>

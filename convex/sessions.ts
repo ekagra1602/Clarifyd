@@ -232,11 +232,8 @@ export const getStudentState = query({
 });
 
 const avatarValidator = v.optional(v.object({
-  hairStyle: v.optional(v.string()),
-  hairColor: v.optional(v.string()),
-  eyes: v.optional(v.string()),
-  skinTone: v.optional(v.string()),
-  accessory: v.optional(v.string()),
+  style: v.optional(v.string()),
+  seed: v.optional(v.string()),
 }));
 
 // Upsert student profile (idempotent); sets profileComplete true

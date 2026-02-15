@@ -72,11 +72,8 @@ export default defineSchema({
     profileComplete: v.optional(v.boolean()),
     displayName: v.optional(v.string()),
     avatar: v.optional(v.object({
-      hairStyle: v.optional(v.string()),
-      hairColor: v.optional(v.string()),
-      eyes: v.optional(v.string()),
-      skinTone: v.optional(v.string()),
-      accessory: v.optional(v.string()),
+      style: v.optional(v.string()),
+      seed: v.optional(v.string()),
     })),
     accessibility: v.optional(v.array(v.string())),
     languagePreference: v.optional(v.string()),
