@@ -27,6 +27,7 @@ import {
   Trash2
 } from "lucide-react";
 import { TranscriptionControls } from "../components/TranscriptionControls";
+import { LeaderboardModal } from "../components/LeaderboardModal";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
@@ -61,6 +62,7 @@ function TeacherSessionPage() {
   const [showQuestionSummary, setShowQuestionSummary] = useState(false);
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const generateSessionNotesAction = useAction(api.ai.service.generateSessionNotes);
 
@@ -220,6 +222,13 @@ function TeacherSessionPage() {
               <QrCode className="text-ink w-6 h-6" />
             </button>
             <button
+              onClick={() => setShowLeaderboard(true)}
+              className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
+              title="Leaderboard"
+            >
+              <span className="text-xl">🔥</span>
+            </button>
+            <button
               onClick={() => setShowUploadModal(true)}
               className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
               title="Upload Class Context"
@@ -228,6 +237,15 @@ function TeacherSessionPage() {
             </button>
           </div>
         </div>
+
+        <AnimatePresence>
+          {showLeaderboard && (
+            <LeaderboardModal
+              sessionId={sessionId as Id<"sessions">}
+              onClose={() => setShowLeaderboard(false)}
+            />
+          )}
+        </AnimatePresence>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
