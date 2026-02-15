@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "convex": {
+      "command": "npx",
+      "args": [
+        "convex",
+        "mcp",
+        "start",
+        "--project-dir",
+        "/Users/cartertran/conductor/workspaces/waitwhat/copan"
+      ],
+      "description": "Convex backend operations"
+    },
+    "github": {
+      "transport": "remote",
+      "url": "https://mcp.github.com",
+      "description": "GitHub repository and issue management"
+    }
+  }
+}

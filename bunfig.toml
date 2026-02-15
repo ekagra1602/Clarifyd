@@ -1,0 +1,3 @@
+# Disable bun test - use "bun run test" instead (runs vitest)
+[test]
+preload = ["./scripts/bun-test-disabled.ts"]

@@ -1,0 +1,30 @@
+node_modules
+.DS_Store
+dist
+.vercel
+
+# Convex generated files
+convex/_generated
+dist-ssr
+*.local
+count.txt
+.env
+.env.local
+.nitro
+.tanstack
+.output
+.vinxi
+todos.json
+
+# Cloudflare
+.wrangler
+
+# Backup files
+*.backup
+
+# Keep .env.example tracked
+!.env.example
+
+# Playwright
+playwright-report/
+test-results/

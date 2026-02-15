@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(bunx tsc:*)",
+      "Bash(npm test:*)",
+      "Bash(bun run test:*)",
+      "Bash(bun test:*)",
+      "mcp__convex_*",
+      "mcp__github_*"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}
