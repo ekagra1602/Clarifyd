@@ -32,6 +32,7 @@ import clsx from "clsx";
 
 export const Route = createFileRoute("/teacher/session/$sessionId")({
   component: TeacherSessionPage,
+  ssr: false,
 });
 
 function TeacherSessionPage() {
@@ -663,10 +664,10 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
           prev.map(uf =>
             uf.file === file
               ? {
-                  ...uf,
-                  status: result.error ? 'error' : 'done',
-                  result: { text: result.text, fileName: file.name, error: result.error }
-                }
+                ...uf,
+                status: result.error ? 'error' : 'done',
+                result: { text: result.text, fileName: file.name, error: result.error }
+              }
               : uf
           )
         );
@@ -811,8 +812,8 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
                           uf.status === 'error'
                             ? "border-red-200 bg-red-50"
                             : uf.status === 'done'
-                            ? "border-green-200 bg-green-50"
-                            : "border-slate-200 bg-slate-50"
+                              ? "border-green-200 bg-green-50"
+                              : "border-slate-200 bg-slate-50"
                         )}
                       >
                         {uf.status === 'pending' || uf.status === 'uploading' || uf.status === 'parsing' ? (

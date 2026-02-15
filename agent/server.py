@@ -82,8 +82,14 @@ def generate_teacher_insights(recent_questions: List[str]) -> str:
             if not real_questions:
                  return f"No questions found in session {session_id}."
             
+            # Fetch context as well
+            context_data = convex_client.query("sessions:getSessionContext", {"sessionId": session_id})
+            uploaded_context = context_data.get("uploadedContext", "") if context_data else ""
+            
+            context_info = f" (Context available: {len(uploaded_context)} chars)" if uploaded_context else ""
+            
             # Simple clustering simulation
-            return f"Analyzed {len(real_questions)} questions from session {session_id}. Common theme: {real_questions[0]}..."
+            return f"Analyzed {len(real_questions)} questions from session {session_id}{context_info}. Common theme: {real_questions[0]}..."
         except Exception as e:
             return f"Error fetching questions: {str(e)}"
 

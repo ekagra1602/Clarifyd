@@ -14,8 +14,8 @@ export function getRouter() {
   if (!CONVEX_URL) {
     throw new Error(
       'Missing VITE_CONVEX_URL environment variable. ' +
-        'Please run "npx convex dev" in a separate terminal to set up Convex, ' +
-        'or add VITE_CONVEX_URL to your .env.local file.'
+      'Please run "npx convex dev" in a separate terminal to set up Convex, ' +
+      'or add VITE_CONVEX_URL to your .env.local file.'
     )
   }
 

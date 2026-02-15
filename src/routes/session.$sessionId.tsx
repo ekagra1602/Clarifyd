@@ -27,6 +27,7 @@ import clsx from "clsx";
 
 export const Route = createFileRoute("/session/$sessionId")({
   component: StudentSessionPage,
+  ssr: false,
 });
 
 function StudentSessionPage() {
