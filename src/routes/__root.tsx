@@ -27,8 +27,8 @@ export const Route = createRootRoute({
       },
       {
         rel: 'icon',
-        type: 'image/png',
-        href: '/clarifyd-icon.png',
+        type: 'image/svg+xml',
+        href: '/favicon.svg',
       },
     ],
   }),

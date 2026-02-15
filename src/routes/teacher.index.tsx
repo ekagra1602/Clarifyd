@@ -2,8 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
-import { Play, Loader2, User, ChevronRight, ChevronLeft } from "lucide-react";
+import { Play, Loader2, User, ChevronRight, ChevronLeft, Shuffle } from "lucide-react";
 import { AvatarPreview } from "../components/AvatarPreview";
+import { DICEBEAR_STYLES, DEFAULT_AVATAR } from "../lib/avatarOptions";
 
 export const Route = createFileRoute("/teacher/")({ component: TeacherIndexPage });
 
@@ -14,13 +15,10 @@ function TeacherIndexPage() {
     const [roomName, setRoomName] = useState("");
     const [instructorName, setInstructorName] = useState("");
 
-    // Avatar state
+    // DiceBear avatar state
     const [avatar, setAvatar] = useState({
-        hairStyle: "short",
-        hairColor: "black",
-        eyes: "normal",
-        skinTone: "light",
-        accessory: "none"
+        style: DEFAULT_AVATAR.style,
+        seed: `teacher-${Date.now()}`,
     });
 
     const handleStartSession = async () => {
@@ -47,29 +45,23 @@ function TeacherIndexPage() {
         }
     };
 
-    // Avatar customization helpers
-    const options = {
-        hairStyle: ["bald", "short", "medium", "long", "spiky", "afro"],
-        hairColor: ["black", "brown", "blonde", "red", "gray", "white", "blue", "pink"],
-        skinTone: ["light", "medium", "dark", "darker"],
-        eyes: ["normal", "happy", "wink", "glasses", "sunglasses"],
-        accessory: ["none", "hat", "bow", "headband"]
+    const cycleStyle = (direction: 1 | -1) => {
+        const currentIndex = DICEBEAR_STYLES.findIndex((s) => s.id === avatar.style);
+        const nextIndex = (currentIndex + direction + DICEBEAR_STYLES.length) % DICEBEAR_STYLES.length;
+        setAvatar((prev) => ({ ...prev, style: DICEBEAR_STYLES[nextIndex].id }));
     };
 
-    const cycleOption = (category: keyof typeof avatar, direction: 1 | -1) => {
-        const current = avatar[category];
-        const categoryOptions = options[category as keyof typeof options];
-        // @ts-ignore
-        const currentIndex = categoryOptions.indexOf(current);
-        const nextIndex = (currentIndex + direction + categoryOptions.length) % categoryOptions.length;
-        setAvatar(prev => ({ ...prev, [category]: categoryOptions[nextIndex] }));
+    const shuffleAvatar = () => {
+        setAvatar((prev) => ({ ...prev, seed: `${Math.random().toString(36).slice(2)}-${Date.now()}` }));
     };
+
+    const currentStyleLabel = DICEBEAR_STYLES.find((s) => s.id === avatar.style)?.label ?? avatar.style;
 
     return (
         <div className="min-h-screen bg-lavender-bg py-12 px-6 flex items-center justify-center">
             <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                {/* Left Column: Class Details — swapped to left */}
+                {/* Left Column: Class Details */}
                 <div className="bg-white p-12 rounded-[2.5rem] shadow-comic border-2 border-ink text-center relative overflow-hidden flex flex-col justify-center">
                     <div className="absolute top-0 left-0 w-full h-4 bg-soft-purple border-b-2 border-ink" />
 
@@ -128,7 +120,7 @@ function TeacherIndexPage() {
                     </button>
                 </div>
 
-                {/* Right Column: Avatar Editor — swapped to right */}
+                {/* Right Column: Avatar Editor (DiceBear) */}
                 <div className="bg-white p-8 rounded-[2.5rem] shadow-comic border-2 border-ink text-center flex flex-col justify-center">
                     <h2 className="text-2xl font-extrabold text-ink mb-6">Your Avatar</h2>
 
@@ -137,25 +129,33 @@ function TeacherIndexPage() {
                     </div>
 
                     <div className="space-y-3 max-w-xs mx-auto w-full">
-                        {Object.entries(options).map(([key, _]) => (
-                            <div key={key} className="flex items-center justify-between bg-lavender-bg rounded-xl p-2 border-2 border-slate-200">
-                                <button
-                                    onClick={() => cycleOption(key as any, -1)}
-                                    className="p-1 hover:bg-white rounded-lg transition-colors"
-                                >
-                                    <ChevronLeft className="w-5 h-5 text-slate-400" />
-                                </button>
-                                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                                </span>
-                                <button
-                                    onClick={() => cycleOption(key as any, 1)}
-                                    className="p-1 hover:bg-white rounded-lg transition-colors"
-                                >
-                                    <ChevronRight className="w-5 h-5 text-slate-400" />
-                                </button>
-                            </div>
-                        ))}
+                        {/* Style selector */}
+                        <div className="flex items-center justify-between bg-lavender-bg rounded-xl p-2 border-2 border-slate-200">
+                            <button
+                                onClick={() => cycleStyle(-1)}
+                                className="p-1 hover:bg-white rounded-lg transition-colors"
+                            >
+                                <ChevronLeft className="w-5 h-5 text-slate-400" />
+                            </button>
+                            <span className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                                {currentStyleLabel}
+                            </span>
+                            <button
+                                onClick={() => cycleStyle(1)}
+                                className="p-1 hover:bg-white rounded-lg transition-colors"
+                            >
+                                <ChevronRight className="w-5 h-5 text-slate-400" />
+                            </button>
+                        </div>
+
+                        {/* Shuffle button */}
+                        <button
+                            onClick={shuffleAvatar}
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-mustard/20 hover:bg-mustard/40 text-ink font-extrabold rounded-xl border-2 border-slate-200 transition-colors btn-press"
+                        >
+                            <Shuffle className="w-4 h-4" />
+                            Shuffle
+                        </button>
                     </div>
                 </div>
             </div>

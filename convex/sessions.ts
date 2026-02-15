@@ -31,11 +31,8 @@ export const createSession = mutation({
     roomName: v.optional(v.string()),
     instructorName: v.optional(v.string()),
     instructorAvatar: v.optional(v.object({
-      hairStyle: v.optional(v.string()),
-      hairColor: v.optional(v.string()),
-      eyes: v.optional(v.string()),
-      skinTone: v.optional(v.string()),
-      accessory: v.optional(v.string()),
+      style: v.optional(v.string()),
+      seed: v.optional(v.string()),
     })),
   },
   handler: async (ctx, args) => {
