@@ -8,6 +8,7 @@ type TranscriptLine = {
   text: string;
   createdAt: number;
   sessionId: Id<"sessions">;
+  source?: string;
 };
 
 type PaginatedTranscriptResult = {

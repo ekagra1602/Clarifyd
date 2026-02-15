@@ -27,6 +27,8 @@ export default defineSchema({
     sessionId: v.id("sessions"),
     text: v.string(),
     createdAt: v.number(),
+    // Optional tag to indicate where this transcript line came from (mic, zoom VTT, captions scrape, etc.)
+    source: v.optional(v.string()),
   }).index("by_session", ["sessionId", "createdAt"]),
 
   // Quiz definitions with MCQ questions
