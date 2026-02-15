@@ -36,6 +36,7 @@ def process_transcript_for_student(profile: StudentProfile, chunk: TranscriptChu
     Processes a transcript chunk for a specific student based on their profile.
     Handles translation and simplification.
     """
+    print(f"[AGENT: process_transcript_for_student] Processing chunk for student {profile.student_id} (Language: {profile.language}, Disability: {profile.disability})")
     processed_text = chunk.text
     
     # Placeholder for LangGraph logic
@@ -54,6 +55,7 @@ def anonymize_question(student_id: str, question: str) -> str:
     """
     Anonymizes a student's question before sending it to the database.
     """
+    print(f"[AGENT: anonymize_question] Anonymizing question for student {student_id}")
     # Simple PII removal (placeholder)
     # In production, use an LLM or specialized library (Presidio)
     return question.replace(student_id, "STUDENT")
@@ -64,6 +66,7 @@ def generate_teacher_insights(recent_questions: List[str]) -> str:
     Analyzes recent student questions to generate insights for the teacher.
     Clusters similar questions.
     """
+    print(f"[AGENT: generate_teacher_insights] Analyzing {len(recent_questions)} recent questions")
     if not recent_questions:
         return "No recent questions to analyze."
         
@@ -100,6 +103,7 @@ def check_library_for_answer(question: str) -> Optional[str]:
     """
     Checks the central library (Vector DB) if a similar question has been asked before.
     """
+    print(f"[AGENT: check_library_for_answer] Checking library for question: {question}")
     # Placeholder for RAG logic
     return None
 
@@ -108,6 +112,7 @@ def launch_auto_quiz(session_id: str, topic: str = "general", difficulty: str = 
     """
     Launches an AI-generated quiz for the session.
     """
+    print(f"[AGENT: launch_auto_quiz] Launching quiz for session {session_id} (Topic: {topic}, Difficulty: {difficulty})")
     if not convex_client:
         return "Error: Convex client not connected."
         
@@ -132,6 +137,7 @@ def submit_ai_answer(question_id: str, answer: str) -> str:
     """
     Submits an AI-generated answer to a specific question.
     """
+    print(f"[AGENT: submit_ai_answer] Submitting answer for question {question_id}")
     if not convex_client:
          return "Error: Convex client not connected."
 

@@ -27,9 +27,10 @@ export const askQuestion = mutation({
     });
 
     // Schedule AI answer generation
-    await ctx.scheduler.runAfter(0, internal.questions.generateAnswer, {
-      questionId,
-    });
+    // DISABLED: External Python Agent now handles this
+    // await ctx.scheduler.runAfter(0, internal.questions.generateAnswer, {
+    //   questionId,
+    // });
 
     return { questionId };
   },
@@ -194,5 +195,13 @@ export const getQuestion = query({
   args: { questionId: v.id("questions") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.questionId);
+  },
+});
+export const listPendingQuestions = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+    const questions = await ctx.db.query("questions").order("desc").take(limit);
+    return questions.filter((q) => !q.answer);
   },
 });

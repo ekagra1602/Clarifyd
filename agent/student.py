@@ -14,6 +14,7 @@ class StudentState(TypedDict):
 def translate_node(state: StudentState):
     profile = state['profile']
     text = state['processed_text']
+    print(f"[AGENT: Student.translate_node] Translating for language: {profile.language}")
     
     if profile.language == 'en':
         return {"processed_text": text}
@@ -28,6 +29,7 @@ def translate_node(state: StudentState):
 def simplify_node(state: StudentState):
     profile = state['profile']
     text = state['processed_text']
+    print(f"[AGENT: Student.simplify_node] Checking simplification for disability: {profile.disability}")
     
     if profile.disability != 'auditory':
         return {"processed_text": text}
@@ -49,6 +51,7 @@ def simplify_node(state: StudentState):
 # student_graph = workflow.compile()
 
 def process_chunk(profile: StudentProfile, chunk: TranscriptChunk) -> str:
+    print(f"[AGENT: Student.process_chunk] Processing chunk: {chunk.text[:50]}...")
     # Manual graph execution for prototype to avoid complex dependency setup if LangGraph fails
     state = {
         "profile": profile,
