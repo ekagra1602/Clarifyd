@@ -27,6 +27,14 @@ export default defineSchema({
       skinTone: v.optional(v.string()),
       accessory: v.optional(v.string()),
     })),
+    instructorName: v.optional(v.string()), // Teacher's name
+    instructorAvatar: v.optional(v.object({
+      hairStyle: v.optional(v.string()),
+      hairColor: v.optional(v.string()),
+      eyes: v.optional(v.string()),
+      skinTone: v.optional(v.string()),
+      accessory: v.optional(v.string()),
+    })),
 
   }).index("by_code", ["code"]),
 

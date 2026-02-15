@@ -329,6 +329,8 @@ function StudentSessionPage() {
             onClose={() => setIsQAOpen(false)}
             instructorName={session.instructorName}
             instructorAvatar={session.instructorAvatar}
+            instructorName={session.instructorName}
+            instructorAvatar={session.instructorAvatar}
           />
         )}
       </AnimatePresence>
@@ -834,12 +836,16 @@ function TranscriptView({
 
 import { AvatarPreview } from "../components/AvatarPreview";
 
+import { AvatarPreview } from "../components/AvatarPreview";
+
 function ChatOverlay({
   sessionId,
   studentId,
   questions,
   currentTranscriptLine,
   onClose,
+  instructorName,
+  instructorAvatar
   instructorName,
   instructorAvatar
 }: {
@@ -956,6 +962,17 @@ function ChatOverlay({
                 {/* AI Answer */}
                 <div className="flex justify-start">
                   {q.answer ? (
+                    <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 mb-1 opacity-70">
+                        {instructorAvatar ? (
+                          <div className="w-4 h-4 rounded-full overflow-hidden border border-ink bg-white">
+                            <AvatarPreview avatar={instructorAvatar} size="sm" />
+                          </div>
+                        ) : (
+                          <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
+                        )}
+                        <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
+                      </div>
                     <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
                       <div className="flex items-center gap-1.5 mb-1 opacity-70">
                         {instructorAvatar ? (
