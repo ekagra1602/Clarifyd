@@ -64,6 +64,27 @@ export default defineSchema({
     lastSeen: v.optional(v.number()), // Heartbeat timestamp
     lostSummary: v.optional(v.string()), // AI-generated summary when student is lost
     lostSummaryAt: v.optional(v.number()), // When the summary was generated
+    // Leaderboard: streak and score (optional for backwards compatibility)
+    currentStreak: v.optional(v.number()),
+    bestStreak: v.optional(v.number()),
+    totalCorrect: v.optional(v.number()),
+    totalAnswered: v.optional(v.number()),
+    score: v.optional(v.number()),
+    // Student profile (avatar, accessibility, preferences)
+    profileComplete: v.optional(v.boolean()),
+    displayName: v.optional(v.string()),
+    avatar: v.optional(v.object({
+      hairStyle: v.optional(v.string()),
+      hairColor: v.optional(v.string()),
+      eyes: v.optional(v.string()),
+      skinTone: v.optional(v.string()),
+      accessory: v.optional(v.string()),
+    })),
+    accessibility: v.optional(v.array(v.string())),
+    languagePreference: v.optional(v.string()),
+    learningPreference: v.optional(v.array(v.string())),
+    pacePreference: v.optional(v.string()),
+    otherAccessibility: v.optional(v.string()),
   })
     .index("by_session", ["sessionId"])
     .index("by_session_student", ["sessionId", "studentId"]),

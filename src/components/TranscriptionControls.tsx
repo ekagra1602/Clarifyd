@@ -89,9 +89,8 @@ export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions">
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={isConnecting}
-        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 border-ink font-bold text-lg transition-all shadow-comic-sm hover:shadow-comic hover:-translate-y-0.5 active:translate-y-0 active:shadow-comic-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-comic-sm disabled:hover:translate-y-0 ${
-          isRecording ? "bg-coral text-white" : "bg-soft-purple text-white"
-        }`}
+        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 border-ink font-bold text-lg transition-all shadow-comic-sm hover:shadow-comic hover:-translate-y-0.5 active:translate-y-0 active:shadow-comic-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-comic-sm disabled:hover:translate-y-0 ${isRecording ? "bg-coral text-white" : "bg-soft-purple text-white"
+          }`}
       >
         {isConnecting ? (
           <>
@@ -169,11 +168,10 @@ export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions">
 
             {zoomMessage && (
               <div
-                className={`mt-3 text-sm font-bold border-2 rounded-xl p-3 ${
-                  zoomStatus === "error"
+                className={`mt-3 text-sm font-bold border-2 rounded-xl p-3 ${zoomStatus === "error"
                     ? "bg-red-50 border-red-200 text-red-700"
                     : "bg-green-50 border-green-200 text-green-700"
-                }`}
+                  }`}
               >
                 {zoomMessage}
               </div>

@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { LeaderboardModal } from "../components/LeaderboardModal";
+import { ProfileOnboardingModal } from "../components/ProfileOnboardingModal";
 
 // ... imports kept same, ensuring used icons are available ...
 // Assuming imports are sufficient or will be auto-fixed, but let's check existing imports.
@@ -36,6 +38,9 @@ function StudentSessionPage() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [isQAOpen, setIsQAOpen] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const keepAlive = useMutation(api.sessions.keepAlive);
 
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
@@ -181,11 +186,57 @@ function StudentSessionPage() {
         )}
       </AnimatePresence>
 
+      {/* Leaderboard Modal */}
+      <AnimatePresence>
+        {showLeaderboard && (
+          <LeaderboardModal
+            sessionId={sessionId as Id<"sessions">}
+            currentStudentId={studentId}
+            onClose={() => setShowLeaderboard(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Profile onboarding (first-time) or edit */}
+      <AnimatePresence>
+        {(showProfileModal || (studentState && !studentState.profileComplete && !hasCompletedOnboarding)) && studentId && (
+          <ProfileOnboardingModal
+            sessionId={sessionId as Id<"sessions">}
+            studentId={studentId}
+            initialProfile={studentState ?? undefined}
+            isEdit={showProfileModal}
+            onClose={() => {
+              setShowProfileModal(false);
+              if (studentState && !studentState.profileComplete) setHasCompletedOnboarding(true);
+            }}
+            onSaved={() => {
+              setHasCompletedOnboarding(true);
+              setShowProfileModal(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative h-full transition-all duration-300">
 
         {/* Header - Absolute Top Right */}
         <div className="absolute top-6 right-6 z-10 flex items-center gap-3">
+          <button
+            onClick={() => setShowProfileModal(true)}
+            className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
+            title="Profile"
+          >
+            <span className="text-sm">Profile</span>
+          </button>
+          <button
+            onClick={() => setShowLeaderboard(true)}
+            className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
+            title="Leaderboard"
+          >
+            <span>🔥</span>
+            <span className="text-sm tabular-nums">{studentState?.currentStreak ?? 0}</span>
+          </button>
           {/* Room Name - Hidden on small screens or when chat is open if constrained */}
           <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 hidden lg:flex">
             {session.roomName || "Classroom"}

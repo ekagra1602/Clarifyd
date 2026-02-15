@@ -67,10 +67,10 @@ export function usePaginatedTranscript(
     api.transcripts.listTranscriptPaginated,
     oldestLoadedTimestamp !== undefined && isLoadingMore
       ? {
-          sessionId,
-          limit: LOAD_MORE_LIMIT,
-          beforeTimestamp: oldestLoadedTimestamp,
-        }
+        sessionId,
+        limit: LOAD_MORE_LIMIT,
+        beforeTimestamp: oldestLoadedTimestamp,
+      }
       : "skip"
   );
 

@@ -89,6 +89,11 @@ export const joinSession = mutation({
       isLost: false,
       joinedAt: Date.now(),
       lastSeen: Date.now(),
+      currentStreak: 0,
+      bestStreak: 0,
+      totalCorrect: 0,
+      totalAnswered: 0,
+      score: 0,
     });
 
     return { sessionId: session._id, studentId };
@@ -208,7 +213,7 @@ export const keepAlive = mutation({
   },
 });
 
-// Get current state for a student
+// Get current state for a student (includes profile; use getStudentState for profile data)
 export const getStudentState = query({
   args: {
     sessionId: v.id("sessions"),
@@ -223,6 +228,56 @@ export const getStudentState = query({
       .first();
 
     return student;
+  },
+});
+
+const avatarValidator = v.optional(v.object({
+  hairStyle: v.optional(v.string()),
+  hairColor: v.optional(v.string()),
+  eyes: v.optional(v.string()),
+  skinTone: v.optional(v.string()),
+  accessory: v.optional(v.string()),
+}));
+
+// Upsert student profile (idempotent); sets profileComplete true
+export const upsertStudentProfile = mutation({
+  args: {
+    sessionId: v.id("sessions"),
+    studentId: v.string(),
+    profileComplete: v.optional(v.boolean()),
+    displayName: v.optional(v.string()),
+    avatar: avatarValidator,
+    accessibility: v.optional(v.array(v.string())),
+    languagePreference: v.optional(v.string()),
+    learningPreference: v.optional(v.array(v.string())),
+    pacePreference: v.optional(v.string()),
+    otherAccessibility: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const student = await ctx.db
+      .query("students")
+      .withIndex("by_session_student", (q) =>
+        q.eq("sessionId", args.sessionId).eq("studentId", args.studentId)
+      )
+      .first();
+
+    if (!student) {
+      throw new Error("Student not found");
+    }
+
+    const updates: Record<string, unknown> = {
+      profileComplete: args.profileComplete ?? true,
+    };
+    if (args.displayName !== undefined) updates.displayName = args.displayName;
+    if (args.avatar !== undefined) updates.avatar = args.avatar;
+    if (args.accessibility !== undefined) updates.accessibility = args.accessibility;
+    if (args.languagePreference !== undefined) updates.languagePreference = args.languagePreference;
+    if (args.learningPreference !== undefined) updates.learningPreference = args.learningPreference;
+    if (args.pacePreference !== undefined) updates.pacePreference = args.pacePreference;
+    if (args.otherAccessibility !== undefined) updates.otherAccessibility = args.otherAccessibility;
+
+    await ctx.db.patch(student._id, updates);
+    return { success: true };
   },
 });
 
