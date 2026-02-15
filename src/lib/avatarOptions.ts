@@ -1,53 +1,41 @@
-// Avatar option ids and labels for profile/onboarding
+// DiceBear avatar styles (https://www.dicebear.com/styles/)
+// API: https://api.dicebear.com/7.x/[style]/svg?seed=[seed]
+// Inclusive mix: Personas, Open Peeps, Adventurer + neutrals and character sets
 
-export const HAIR_STYLES = [
-  { id: "short", label: "Short" },
-  { id: "long", label: "Long" },
-  { id: "curly", label: "Curly" },
-  { id: "ponytail", label: "Ponytail" },
-  { id: "bun", label: "Bun" },
-  { id: "bob", label: "Bob" },
-] as const;
-
-export const HAIR_COLORS = [
-  { id: "black", label: "Black", hex: "#1a1a1a" },
-  { id: "brown", label: "Brown", hex: "#5c4033" },
-  { id: "blonde", label: "Blonde", hex: "#d4a84b" },
-  { id: "red", label: "Red", hex: "#a52a2a" },
-  { id: "gray", label: "Gray", hex: "#6b7280" },
-] as const;
-
-export const EYES_OPTIONS = [
-  { id: "default", label: "Default" },
-  { id: "wide", label: "Wide" },
-  { id: "narrow", label: "Narrow" },
-  { id: "smile", label: "Smile" },
-] as const;
-
-export const SKIN_TONES = [
-  { id: "light", label: "Light", hex: "#f5d0c4" },
-  { id: "medium", label: "Medium", hex: "#e8b89a" },
-  { id: "tan", label: "Tan", hex: "#c98b5e" },
-  { id: "dark", label: "Dark", hex: "#8d5524" },
-] as const;
-
-export const ACCESSORIES = [
-  { id: "none", label: "None" },
-  { id: "glasses", label: "Glasses" },
+export const DICEBEAR_STYLES = [
+  { id: "personas", label: "Personas" },
+  { id: "open-peeps", label: "Open Peeps" },
+  { id: "adventurer", label: "Adventurer" },
+  { id: "adventurer-neutral", label: "Adventurer Neutral" },
+  { id: "lorelei", label: "Lorelei" },
+  { id: "lorelei-neutral", label: "Lorelei Neutral" },
+  { id: "avataaars", label: "Avataaars" },
+  { id: "avataaars-neutral", label: "Avataaars Neutral" },
+  { id: "notionists", label: "Notionists" },
+  { id: "notionists-neutral", label: "Notionists Neutral" },
+  { id: "micah", label: "Micah" },
+  { id: "big-ears", label: "Big Ears" },
+  { id: "big-ears-neutral", label: "Big Ears Neutral" },
+  { id: "croodles", label: "Croodles" },
+  { id: "croodles-neutral", label: "Croodles Neutral" },
+  { id: "bottts", label: "Bottts" },
+  { id: "fun-emoji", label: "Fun Emoji" },
 ] as const;
 
 export const DEFAULT_AVATAR = {
-  hairStyle: HAIR_STYLES[0].id,
-  hairColor: HAIR_COLORS[0].id,
-  eyes: EYES_OPTIONS[0].id,
-  skinTone: SKIN_TONES[0].id,
-  accessory: ACCESSORIES[0].id,
+  style: DICEBEAR_STYLES[0].id,
+  seed: "default",
 } as const;
 
 export type AvatarShape = {
-  hairStyle: string;
-  hairColor: string;
-  eyes: string;
-  skinTone: string;
-  accessory: string;
+  style: string;
+  seed: string;
 };
+
+const DICEBEAR_BASE = "https://api.dicebear.com/7.x";
+
+export function getDiceBearUrl(style: string, seed: string): string {
+  const safeStyle = DICEBEAR_STYLES.some((s) => s.id === style) ? style : DICEBEAR_STYLES[0].id;
+  const safeSeed = seed && seed.trim() ? encodeURIComponent(seed.trim()) : "default";
+  return `${DICEBEAR_BASE}/${safeStyle}/svg?seed=${safeSeed}`;
+}
