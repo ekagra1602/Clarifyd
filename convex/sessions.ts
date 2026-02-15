@@ -311,7 +311,7 @@ export const generateLostSummary = internalAction({
     questionId: v.id("questions"),
   },
   handler: async (ctx, args) => {
-    const result = await ctx.runAction(internal.ai.service.callGemini, {
+    const result = await ctx.runAction(internal.ai.service.callClaude, {
       featureType: "lost_summary",
       sessionId: args.sessionId,
       studentId: args.studentId,

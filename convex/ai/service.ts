@@ -6,7 +6,7 @@ import { internal, api } from "../_generated/api";
 import {
   AIFeatureType,
   AIResponse,
-  GeminiResponse,
+  ClaudeResponse,
   QuizGenerationResult,
   QuestionSummaryResult,
   LostSummaryResult,
@@ -23,17 +23,17 @@ import {
 import { compressPrompts, compressText } from "./compression";
 
 // ==========================================
-// Gemini API Configuration
+// Claude API Configuration
 // ==========================================
 
-const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
+const DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
 // ==========================================
 // Core API Call Function
 // ==========================================
 
-async function callGeminiAPI(
+async function callClaudeAPI(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
@@ -44,48 +44,33 @@ async function callGeminiAPI(
     responseFormat: "json" | "text";
   }
 ): Promise<
-  { success: true; response: GeminiResponse } | { success: false; error: string }
+  { success: true; response: ClaudeResponse } | { success: false; error: string }
 > {
   try {
-    const generationConfig: Record<string, unknown> = {
-      temperature: config.temperature,
-      maxOutputTokens: config.maxOutputTokens,
-    };
-
-    // Only add thinking config if budget is allocated (and supported by model)
-    if (config.thinkingBudget > 0) {
-      generationConfig.thinkingConfig = {
-        thinkingBudget: config.thinkingBudget,
-      };
-    }
-
-    // Request JSON output for structured responses
-    if (config.responseFormat === "json") {
-      generationConfig.responseMimeType = "application/json";
-    }
-
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch(CLAUDE_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: [
+        model: process.env.CLAUDE_MODEL || DEFAULT_CLAUDE_MODEL,
+        system: systemPrompt,
+        messages: [
           {
-            parts: [{ text: userPrompt }],
+            role: "user",
+            content: userPrompt,
           },
         ],
-        generationConfig,
+        temperature: config.temperature,
+        max_tokens: config.maxOutputTokens,
       }),
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error("Gemini API error:", response.status, errorBody);
+      console.error("Claude API error:", response.status, errorBody);
 
       if (response.status === 429) {
         return { success: false, error: "RATE_LIMITED" };
@@ -96,7 +81,7 @@ async function callGeminiAPI(
     const data = await response.json();
     return { success: true, response: data };
   } catch (error) {
-    console.error("Gemini API call failed:", error);
+    console.error("Claude API call failed:", error);
     return { success: false, error: String(error) };
   }
 }
@@ -105,20 +90,16 @@ async function callGeminiAPI(
 // Response Extraction Utilities
 // ==========================================
 
-function extractTextFromResponse(response: GeminiResponse): string | null {
-  const candidate = response.candidates?.[0];
-  if (!candidate?.content?.parts) return null;
-
-  // Filter out thinking parts (Gemini 2.5 feature)
-  const responseParts = candidate.content.parts.filter(
-    (part) => part.text && !part.thought
-  );
-
-  const text = responseParts.map((part) => part.text).join("\n\n");
+function extractTextFromResponse(response: ClaudeResponse): string | null {
+  const contentBlocks = response.content ?? [];
+  const text = contentBlocks
+    .filter((block) => block.type === "text" && typeof block.text === "string")
+    .map((block) => block.text)
+    .join("\n\n");
   return text.trim() || null;
 }
 
-function extractJSONFromResponse<T>(response: GeminiResponse): T | null {
+function extractJSONFromResponse<T>(response: ClaudeResponse): T | null {
   const text = extractTextFromResponse(response);
   if (!text) return null;
 
@@ -147,7 +128,7 @@ function extractJSONFromResponse<T>(response: GeminiResponse): T | null {
  * Single entry point for all AI calls.
  * This is an internal action called by other Convex functions.
  */
-export const callGemini = internalAction({
+export const callClaude = internalAction({
   args: {
     featureType: v.union(
       v.literal("qa_answer"),
@@ -181,15 +162,15 @@ export const callGemini = internalAction({
     const featureType = args.featureType as AIFeatureType;
 
     // Validate API key
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.CLAUDE_API_KEY;
     if (!apiKey) {
-      console.error("GEMINI_API_KEY not set");
+      console.error("CLAUDE_API_KEY not set");
       return {
         success: false,
         featureType,
         error: {
           code: "API_KEY_MISSING",
-          message: "GEMINI_API_KEY not configured",
+          message: "CLAUDE_API_KEY not configured",
         },
       };
     }
@@ -263,19 +244,19 @@ export const callGemini = internalAction({
         break;
     }
 
-    // Compress prompts before calling Gemini API
+    // Compress prompts before calling Claude API
     const { compressedSystem, compressedUser } = await compressPrompts(
       featureType,
       systemPrompt,
       userPrompt
     );
 
-    // Call Gemini API with compressed prompts
-    console.log(`Calling Gemini API for ${featureType}...`);
-    const apiResult = await callGeminiAPI(apiKey, compressedSystem, compressedUser, config);
+    // Call Claude API with compressed prompts
+    console.log(`Calling Claude API for ${featureType}...`);
+    const apiResult = await callClaudeAPI(apiKey, compressedSystem, compressedUser, config);
 
     if (!apiResult.success) {
-      console.error(`Gemini API error for ${featureType}:`, apiResult.error);
+      console.error(`Claude API error for ${featureType}:`, apiResult.error);
       const errorCode =
         apiResult.error === "RATE_LIMITED" ? "RATE_LIMITED" : "API_ERROR";
       return {
@@ -296,7 +277,7 @@ export const callGemini = internalAction({
 
 function parseResponse(
   featureType: AIFeatureType,
-  response: GeminiResponse
+  response: ClaudeResponse
 ): AIResponse {
   switch (featureType) {
     case "qa_answer": {
@@ -389,9 +370,9 @@ export const generateSessionNotes = action({
     }
 
     // Validate API key
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.CLAUDE_API_KEY;
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY not configured in Convex dashboard.");
+      throw new Error("CLAUDE_API_KEY not configured in Convex dashboard.");
     }
 
     const systemPrompt = `You are an expert educational assistant that creates comprehensive study notes.`;
@@ -415,7 +396,7 @@ Include:
 Format with clear headers and bullet points.
 `;
 
-    // Compress prompts before calling Gemini API (if enabled)
+    // Compress prompts before calling Claude API (if enabled)
     const globalEnabled = process.env.COMPRESSION_ENABLED !== "false";
     let compressedSystem = systemPrompt;
     let compressedUser = userPrompt;
@@ -449,7 +430,7 @@ Format with clear headers and bullet points.
       }
     }
 
-    const result = await callGeminiAPI(apiKey, compressedSystem, compressedUser, {
+    const result = await callClaudeAPI(apiKey, compressedSystem, compressedUser, {
       temperature: 0.7,
       maxOutputTokens: 4000,
       thinkingBudget: 2048,
@@ -457,7 +438,7 @@ Format with clear headers and bullet points.
     });
 
     if (!result.success) {
-      console.error("Gemini API Error:", result.error);
+      console.error("Claude API Error:", result.error);
       throw new Error("Failed to generate notes with AI. Please try again later.");
     }
 

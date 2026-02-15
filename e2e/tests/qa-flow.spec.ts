@@ -70,7 +70,7 @@ test.describe("Q&A Feature", () => {
       await studentSession.askQuestion(testQuestion);
 
       // Question should appear in chat
-      // Note: AI answer depends on Gemini API key being configured
+      // Note: AI answer depends on Claude API key being configured
       await expect(studentPage.getByText(testQuestion)).toBeVisible({
         timeout: 10000,
       });
