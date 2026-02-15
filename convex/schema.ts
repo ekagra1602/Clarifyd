@@ -104,8 +104,12 @@ export default defineSchema({
     studentId: v.string(),
     question: v.string(),
     answer: v.optional(v.string()), // AI-generated answer
+    isApproved: v.optional(v.boolean()), // Teacher approval status
     translatedQuestion: v.optional(v.string()), // English translation if original wasn't English
+    translatedAnswer: v.optional(v.string()), // Translation of the answer back to student's language
     originalLanguage: v.optional(v.string()), // Original language if translated
+    teacherFollowUp: v.optional(v.string()), // Teacher's follow-up note
+    translatedTeacherFollowUp: v.optional(v.string()), // Translation of follow-up
     createdAt: v.number(),
   }).index("by_session", ["sessionId", "createdAt"]),
 

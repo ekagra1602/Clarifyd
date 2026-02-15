@@ -18,6 +18,8 @@ import {
   Clapperboard,
   Wand2,
   XCircle,
+  Globe,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
@@ -851,6 +853,10 @@ function ChatOverlay({
     _id: string;
     question: string;
     answer?: string;
+    isApproved?: boolean;
+    translatedQuestion?: string;
+    translatedAnswer?: string;
+    originalLanguage?: string;
     createdAt: number;
   }[];
   currentTranscriptLine: string | null;
@@ -948,39 +954,68 @@ function ChatOverlay({
             ) : (
               questions.map((q) => (
                 <div key={q._id} className="space-y-2">
-                  {/* Student Question */}
+                  {/* Question Bubble */}
                   <div className="flex justify-end">
-                    <div className="bg-coral text-white px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm font-bold border-2 border-ink shadow-comic-sm max-w-[80%]">
-                      {q.question}
+                    <div className="bg-ink text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%] shadow-sm">
+                      <p className="font-bold text-sm">{q.question}</p>
                     </div>
                   </div>
 
-                  {/* AI Answer */}
-                  <div className="flex justify-start">
-                    {q.answer ? (
+                  {/* Answer Bubble */}
+                  {q.answer && (
+                    <div className="flex justify-start">
+                      <div className={clsx(
+                        "border-2 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]",
+                        q.isApproved ? "bg-slate-100 border-slate-200" : "bg-yellow-50 border-yellow-300"
+                      )}>
+                        {q.translatedAnswer ? (
+                          <div className="space-y-1">
+                            <p className="font-medium text-sm text-slate-700">{q.translatedAnswer}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                              <Globe className="w-3 h-3" />
+                              Translated Answer
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="font-medium text-sm text-slate-700">{q.answer}</p>
+                        )}
 
-                      <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 mb-1 opacity-70">
-                          {instructorAvatar ? (
-                            <div className="w-4 h-4 rounded-full overflow-hidden border border-ink bg-white">
-                              <AvatarPreview avatar={instructorAvatar} size="sm" />
+                        {/* Teacher Follow-up */}
+                        {(q.teacherFollowUp || q.translatedTeacherFollowUp) && (
+                          <div className="mt-3 pt-3 border-t border-slate-200/50">
+                            <div className="flex items-start gap-2">
+                              <div className="bg-blue-100/50 p-1.5 rounded-lg shrink-0">
+                                <MessageSquare className="w-3 h-3 text-blue-500" />
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider">Teacher Note</p>
+                                <p className="text-sm text-slate-700">
+                                  {q.translatedTeacherFollowUp || q.teacherFollowUp}
+                                </p>
+                                {q.translatedTeacherFollowUp && (
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <Globe className="w-3 h-3" />
+                                    Translated
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                          ) : (
-                            <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
-                          )}
-                          <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
-                        </div>
-                        {q.answer}
+                          </div>
+                        )}
+
+                        {!q.isApproved && !q.teacherFollowUp && (
+                          <p className="text-[10px] text-yellow-600 font-bold mt-2 flex items-center gap-1 uppercase tracking-wider">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Verifying...
+                          </p>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))
             )}
+
           </div>
 
           {/* Input Area */}
@@ -1004,11 +1039,11 @@ function ChatOverlay({
               </button>
             </form>
           </div>
-        </motion.div>
-      </div>
+        </motion.div >
+      </div >
 
       {/* Live Transcript Ticker - pinned to bottom */}
-      <div className="shrink-0 px-4 pb-5 pt-1">
+      < div className="shrink-0 px-4 pb-5 pt-1" >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1034,8 +1069,8 @@ function ChatOverlay({
             </div>
           )}
         </motion.div>
-      </div>
-    </motion.div>
+      </div >
+    </motion.div >
   );
 }
 

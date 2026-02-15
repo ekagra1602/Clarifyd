@@ -65,6 +65,39 @@ export const saveAnswer = mutation({
   },
 });
 
+// Approve or edit an answer
+export const approveAnswer = mutation({
+  args: {
+    questionId: v.id("questions"),
+    answer: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const question = await ctx.db.get(args.questionId);
+    if (!question) throw new Error("Question not found");
+
+    await ctx.db.patch(args.questionId, {
+      answer: args.answer,
+      isApproved: true,
+    });
+
+    // Check if we need to translate the response
+    const student = await ctx.db
+      .query("students")
+      .withIndex("by_session_student", (q) =>
+        q.eq("sessionId", question.sessionId).eq("studentId", question.studentId)
+      )
+      .first();
+
+    if (student?.languagePreference && student.languagePreference !== "English") {
+      await ctx.scheduler.runAfter(0, internal.questions.translateResponse, {
+        questionId: args.questionId,
+        answerText: args.answer,
+        targetLanguage: student.languagePreference,
+      });
+    }
+  },
+});
+
 // Internal mutation to save answer (called from action)
 export const saveAnswerInternal = internalMutation({
   args: {
@@ -98,6 +131,30 @@ export const getQuestionInternal = internalQuery({
   args: { questionId: v.id("questions") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.questionId);
+  },
+});
+
+export const saveTranslatedFollowUp = internalMutation({
+  args: {
+    questionId: v.id("questions"),
+    translatedFollowUp: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.questionId, {
+      translatedTeacherFollowUp: args.translatedFollowUp,
+    });
+  },
+});
+
+export const saveTranslatedResponse = internalMutation({
+  args: {
+    questionId: v.id("questions"),
+    translatedAnswer: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.questionId, {
+      translatedAnswer: args.translatedAnswer,
+    });
   },
 });
 
@@ -167,6 +224,76 @@ export const translateQuestion = internalAction({
         translatedQuestion: result.translateResult.translatedText,
         originalLanguage: result.translateResult.originalLanguage,
       });
+    }
+  },
+});
+
+// Add a teacher follow-up to a question
+export const addTeacherFollowUp = mutation({
+  args: {
+    questionId: v.id("questions"),
+    followUp: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const question = await ctx.db.get(args.questionId);
+    if (!question) throw new Error("Question not found");
+
+    await ctx.db.patch(args.questionId, {
+      teacherFollowUp: args.followUp,
+    });
+
+    // Check if we need to translate the follow-up
+    const student = await ctx.db
+      .query("students")
+      .withIndex("by_session_student", (q) =>
+        q.eq("sessionId", question.sessionId).eq("studentId", question.studentId)
+      )
+      .first();
+
+    if (student?.languagePreference && student.languagePreference !== "English") {
+      await ctx.scheduler.runAfter(0, internal.questions.translateResponse, {
+        questionId: args.questionId,
+        answerText: args.followUp,
+        targetLanguage: student.languagePreference,
+        isFollowUp: true,
+      });
+    }
+  },
+});
+
+export const translateResponse = internalAction({
+  args: {
+    questionId: v.id("questions"),
+    answerText: v.string(),
+    targetLanguage: v.string(),
+    isFollowUp: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const question = await ctx.runQuery(internal.questions.getQuestionInternal, {
+      questionId: args.questionId,
+    });
+
+    if (!question) return;
+
+    const result = await ctx.runAction(internal.ai.service.callClaude, {
+      featureType: "translate_response",
+      sessionId: question.sessionId,
+      answerText: args.answerText,
+      targetLanguage: args.targetLanguage,
+    });
+
+    if (result.success && result.translateResult) {
+      if (args.isFollowUp) {
+        await ctx.runMutation(internal.questions.saveTranslatedFollowUp, {
+          questionId: args.questionId,
+          translatedFollowUp: result.translateResult.translatedText,
+        });
+      } else {
+        await ctx.runMutation(internal.questions.saveTranslatedResponse, {
+          questionId: args.questionId,
+          translatedAnswer: result.translateResult.translatedText,
+        });
+      }
     }
   },
 });

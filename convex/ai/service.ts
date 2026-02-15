@@ -21,6 +21,7 @@ import {
   buildQuestionSummaryPrompt,
   buildLostSummaryPrompt,
   buildTranslatePrompt,
+  buildTranslateResponsePrompt,
 } from "./prompts";
 import { compressPrompts, compressText } from "./compression";
 
@@ -137,7 +138,8 @@ export const callClaude = internalAction({
       v.literal("quiz_generation"),
       v.literal("question_summary"),
       v.literal("lost_summary"),
-      v.literal("translate_question")
+      v.literal("translate_question"),
+      v.literal("translate_response")
     ),
     sessionId: v.id("sessions"),
 
@@ -160,6 +162,10 @@ export const callClaude = internalAction({
     // Lost summary specific
     studentId: v.optional(v.string()),
     recentMinutes: v.optional(v.number()),
+
+    // Translate response specific
+    answerText: v.optional(v.string()),
+    targetLanguage: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<AIResponse> => {
     const featureType = args.featureType as AIFeatureType;
@@ -260,6 +266,20 @@ export const callClaude = internalAction({
         userPrompt = buildTranslatePrompt(args.questionText);
         break;
 
+      case "translate_response":
+        if (!args.answerText || !args.targetLanguage) {
+          return {
+            success: false,
+            featureType,
+            error: {
+              code: "CONTEXT_ERROR",
+              message: "answerText and targetLanguage required for translation",
+            },
+          };
+        }
+        userPrompt = buildTranslateResponsePrompt(args.answerText, args.targetLanguage);
+        break;
+
 
     }
 
@@ -356,6 +376,18 @@ function parseResponse(
     }
 
     case "translate_question": {
+      const parsed = extractJSONFromResponse<TranslateResult>(response);
+      if (!parsed?.translatedText) {
+        return {
+          success: false,
+          featureType,
+          error: { code: "PARSE_ERROR", message: "Invalid translation JSON structure" },
+        };
+      }
+      return { success: true, featureType, translateResult: parsed };
+    }
+
+    case "translate_response": {
       const parsed = extractJSONFromResponse<TranslateResult>(response);
       if (!parsed?.translatedText) {
         return {
