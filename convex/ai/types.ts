@@ -23,6 +23,8 @@ export interface AIContext {
     question: string;
     answer?: string;
   }>;
+  // TODO: Add optional studentProfile (languagePreference, accessibility, learningPreference, pacePreference)
+  // from sessions.getStudentState for personalization: output language, verbosity, captions/audio emphasis.
 }
 
 // ==========================================

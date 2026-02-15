@@ -226,7 +226,7 @@ export function useRealtimeTranscription({
             // Final transcript - save to Convex
             const text = transcript.trim();
             if (text) {
-              await saveTranscript({ sessionId, text });
+              await saveTranscript({ sessionId, text, source: "assemblyai_mic" });
             }
             setPartialTranscript("");
           } else {

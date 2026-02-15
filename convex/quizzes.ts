@@ -2,6 +2,7 @@ import { mutation, query, internalMutation, internalAction, internalQuery } from
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { AIResponse } from "./ai/types";
+import { computeScore } from "./leaderboard";
 
 /**
  * Quiz Functions
@@ -78,6 +79,47 @@ export const submitQuiz = mutation({
       answers: args.answers,
       createdAt: Date.now(),
     });
+
+    // Update leaderboard stats (one update per submission)
+    const quiz = await ctx.db.get(args.quizId);
+    if (quiz) {
+      const student = await ctx.db
+        .query("students")
+        .withIndex("by_session_student", (q) =>
+          q.eq("sessionId", quiz.sessionId).eq("studentId", args.studentId)
+        )
+        .first();
+
+      if (student) {
+        let currentStreak = student.currentStreak ?? 0;
+        let bestStreak = student.bestStreak ?? 0;
+        let totalCorrect = student.totalCorrect ?? 0;
+        let totalAnswered = student.totalAnswered ?? 0;
+
+        for (let i = 0; i < quiz.questions.length; i++) {
+          const q = quiz.questions[i];
+          const chosen = args.answers[i];
+          const correct = chosen !== undefined && chosen === q.correctIndex;
+          totalAnswered += 1;
+          if (correct) {
+            currentStreak += 1;
+            totalCorrect += 1;
+          } else {
+            currentStreak = 0;
+          }
+          if (currentStreak > bestStreak) bestStreak = currentStreak;
+        }
+
+        const score = computeScore(totalCorrect, currentStreak);
+        await ctx.db.patch(student._id, {
+          currentStreak,
+          bestStreak,
+          totalCorrect,
+          totalAnswered,
+          score,
+        });
+      }
+    }
 
     return { success: true };
   },

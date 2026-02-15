@@ -27,11 +27,13 @@ import {
   Trash2
 } from "lucide-react";
 import { TranscriptionControls } from "../components/TranscriptionControls";
+import { LeaderboardModal } from "../components/LeaderboardModal";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
 export const Route = createFileRoute("/teacher/session/$sessionId")({
   component: TeacherSessionPage,
+  ssr: false,
 });
 
 function TeacherSessionPage() {
@@ -61,6 +63,7 @@ function TeacherSessionPage() {
   const [showQuestionSummary, setShowQuestionSummary] = useState(false);
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const generateSessionNotesAction = useAction(api.ai.service.generateSessionNotes);
 
@@ -220,6 +223,13 @@ function TeacherSessionPage() {
               <QrCode className="text-ink w-6 h-6" />
             </button>
             <button
+              onClick={() => setShowLeaderboard(true)}
+              className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
+              title="Leaderboard"
+            >
+              <span className="text-xl">🔥</span>
+            </button>
+            <button
               onClick={() => setShowUploadModal(true)}
               className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
               title="Upload Class Context"
@@ -228,6 +238,15 @@ function TeacherSessionPage() {
             </button>
           </div>
         </div>
+
+        <AnimatePresence>
+          {showLeaderboard && (
+            <LeaderboardModal
+              sessionId={sessionId as Id<"sessions">}
+              onClose={() => setShowLeaderboard(false)}
+            />
+          )}
+        </AnimatePresence>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
@@ -663,10 +682,10 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
           prev.map(uf =>
             uf.file === file
               ? {
-                  ...uf,
-                  status: result.error ? 'error' : 'done',
-                  result: { text: result.text, fileName: file.name, error: result.error }
-                }
+                ...uf,
+                status: result.error ? 'error' : 'done',
+                result: { text: result.text, fileName: file.name, error: result.error }
+              }
               : uf
           )
         );
@@ -811,8 +830,8 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
                           uf.status === 'error'
                             ? "border-red-200 bg-red-50"
                             : uf.status === 'done'
-                            ? "border-green-200 bg-green-50"
-                            : "border-slate-200 bg-slate-50"
+                              ? "border-green-200 bg-green-50"
+                              : "border-slate-200 bg-slate-50"
                         )}
                       >
                         {uf.status === 'pending' || uf.status === 'uploading' || uf.status === 'parsing' ? (
