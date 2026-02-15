@@ -62,7 +62,7 @@ The following flow must work end-to-end:
 - **Backend**: Convex (single source of truth + real-time updates)
 - **Frontend**: React (Teacher Console + Student UI)
 - **Transcription**: AssemblyAI Universal Streaming v3 (browser → WebSocket → Convex mutation)
-- **AI**: Gemini 2.5 Flash for Q&A, quiz generation, lost summaries, and session notes
+- **AI**: Claude Sonnet 4 for Q&A, quiz generation, lost summaries, and session notes
 
 ### 3.3 Real-time Strategy
 
@@ -340,9 +340,9 @@ Computed from `lostEvents`:
 | Component | Primary | Fallback |
 |-----------|---------|----------|
 | Transcription | AssemblyAI Universal Streaming | Manual transcript entry or HTTP endpoint |
-| Quiz Generation | Gemini 2.5 Flash | Fallback quiz payload |
-| AI Q&A | Gemini with context | Generic "unable to answer" response |
-| Lost Summary | Gemini summary | Simple "Review the transcript" message |
+| Quiz Generation | Claude Sonnet 4 | Fallback quiz payload |
+| AI Q&A | Claude with context | Generic "unable to answer" response |
+| Lost Summary | Claude summary | Simple "Review the transcript" message |
 
 ---
 

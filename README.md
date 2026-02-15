@@ -1,7 +1,7 @@
 ## Features
 
 - Live transcription display (AssemblyAI Universal Streaming)
-- AI-powered Q&A (Gemini 2.5 Flash)
+- AI-powered Q&A (Claude Sonnet 4)
 - Teacher-triggered comprehension quizzes (AI-generated from transcript content since last quiz)
 - "I'm lost" signals with spike detection
 - QR code join for students
@@ -12,7 +12,7 @@
 ### Core Infrastructure
 
 - [Convex](https://convex.dev) - Real-time database and backend platform
-- [Google Gemini 2.5 Flash](https://ai.google.dev/gemini-api) - AI model for Q&A, quiz generation, and session summaries
+- [Anthropic Claude Sonnet 4](https://www.anthropic.com/claude) - AI model for Q&A, quiz generation, and session summaries
 - [AssemblyAI Universal Streaming](https://www.assemblyai.com/universal-streaming) - Real-time speech-to-text transcription (~300ms latency)
 - [Token Company](https://www.tokencompany.com) - Prompt compression API for reduced token costs
 
@@ -36,7 +36,7 @@
 You'll need accounts with:
 - [Convex](https://convex.dev) - Real-time backend
 - [AssemblyAI](https://www.assemblyai.com) - Speech-to-text API
-- [Google AI Studio](https://aistudio.google.com) - Gemini API
+- [Anthropic Console](https://console.anthropic.com) - Claude API
 - [Token Company](https://tokencompany.com) (optional) - Prompt compression
 
 ### Local Development
@@ -71,7 +71,7 @@ These must be set in the [Convex Dashboard](https://dashboard.convex.dev) under 
 
 | Variable | Required | Get From |
 |----------|----------|----------|
-| `GEMINI_API_KEY` | Yes | [Google AI Studio](https://aistudio.google.com/apikey) |
+| `CLAUDE_API_KEY` | Yes | [Anthropic Console](https://console.anthropic.com/settings/keys) |
 | `ASSEMBLYAI_API_KEY` | Yes | [AssemblyAI Dashboard](https://www.assemblyai.com/dashboard) |
 | `TRANSCRIPTION_SECRET` | Yes | Generate: `openssl rand -base64 32` |
 | `TOKEN_COMPANY_API_KEY` | No | [Token Company](https://tokencompany.com) |

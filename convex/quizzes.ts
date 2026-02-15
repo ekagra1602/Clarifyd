@@ -252,7 +252,7 @@ export const generateQuiz = internalAction({
       }
     }
 
-    const result: AIResponse = await ctx.runAction(internal.ai.service.callGemini, {
+    const result: AIResponse = await ctx.runAction(internal.ai.service.callClaude, {
       featureType: "quiz_generation",
       sessionId: args.sessionId,
       questionCount: args.questionCount ?? 3,
