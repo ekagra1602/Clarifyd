@@ -4,6 +4,9 @@ from convex import ConvexClient
 from dotenv import load_dotenv
 
 # Load environment variables
+# Load environment variables
+# Load .env.local first (if exists) to override .env defaults (which usually has VITE_CONVEX_URL=http://localhost...)
+load_dotenv(".env.local")
 load_dotenv()
 
 class ConvexConnection:

@@ -11,6 +11,7 @@ except Exception as e:
     collection = None
 
 def add_document(doc_id: str, text: str, metadata: dict = None):
+    print(f"[AGENT: Library.add_document] Adding document: {doc_id}")
     if collection:
         collection.add(
             documents=[text],
@@ -19,6 +20,7 @@ def add_document(doc_id: str, text: str, metadata: dict = None):
         )
 
 def query_library(query_text: str, n_results: int = 1) -> Optional[str]:
+    print(f"[AGENT: Library.query_library] Querying for: {query_text} (n={n_results})")
     if not collection:
         return None
         
@@ -37,6 +39,7 @@ def check_if_asked_before(question_text: str) -> Optional[str]:
     Checks if a similar question exists in the library.
     Returns the answer if found, otherwise None.
     """
+    print(f"[AGENT: Library.check_if_asked_before] Checking if asked before: {question_text}")
     # Threshold based check would go here
     result = query_library(question_text)
     # Placeholder: assume if result exists, it's a match (for prototype)
