@@ -14,16 +14,14 @@ import {
   CheckCircle2, // Used in "I'm Lost" button success state
   MessageCircle, // Used in Q&A button
   Users, // Used in header
-  Download // Used in notes download
+  Download, // Used in notes download
+  Clapperboard,
+  Wand2,
+  XCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
-// ... imports kept same, ensuring used icons are available ...
-// Assuming imports are sufficient or will be auto-fixed, but let's check existing imports.
-// We need: MessageCircle, Users, CheckCircle2, AlertCircle, Send, Loader2, etc. (Already there)
-// Adding X for close button if not present? It's not in the original imports. 
-// I'll stick to using existing imports or add X if needed. The original had "rotate-45" divs for close.
 
 export const Route = createFileRoute("/session/$sessionId")({
   component: StudentSessionPage,
@@ -35,6 +33,8 @@ function StudentSessionPage() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [isQAOpen, setIsQAOpen] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const keepAlive = useMutation(api.sessions.keepAlive);
 
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
@@ -218,7 +218,11 @@ function StudentSessionPage() {
 
           {/* Chat Toggle */}
           <button
-            onClick={() => setIsQAOpen(!isQAOpen)}
+            onClick={() => {
+              const next = !isQAOpen;
+              setIsQAOpen(next);
+              if (next) setIsVideoOpen(false);
+            }}
             className={clsx(
               "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold text-ink flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-slate-100",
               isQAOpen ? "bg-coral text-white active:bg-coral-dark" : "bg-white"
@@ -226,6 +230,24 @@ function StudentSessionPage() {
           >
             <MessageCircle className="w-6 h-6" />
             <span>{isQAOpen ? "Close Chat" : "Ask Question"}</span>
+          </button>
+
+          {/* Video Studio Toggle */}
+          <button
+            onClick={() => {
+              const next = !isVideoOpen;
+              setIsVideoOpen(next);
+              if (next) setIsQAOpen(false);
+            }}
+            className={clsx(
+              "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
+              isVideoOpen
+                ? "bg-deep-purple text-white"
+                : "bg-soft-purple text-ink hover:bg-soft-purple/80"
+            )}
+          >
+            <Clapperboard className="w-6 h-6" />
+            <span>{isVideoOpen ? "Close Video" : "Video Studio"}</span>
           </button>
 
           {/* I'm Lost Button */}
@@ -262,7 +284,351 @@ function StudentSessionPage() {
 
       </AnimatePresence>
 
+      {/* Video Studio Overlay */}
+      <AnimatePresence>
+        {isVideoOpen && studentId && (
+          <VideoStudioOverlay
+            sessionId={sessionId as Id<"sessions">}
+            studentId={studentId}
+            activeVideoUrl={activeVideoUrl}
+            setActiveVideoUrl={setActiveVideoUrl}
+            currentTranscriptLine={
+              paginatedTranscript.lines.length > 0
+                ? paginatedTranscript.lines[paginatedTranscript.lines.length - 1].text
+                : null
+            }
+            onClose={() => {
+              setIsVideoOpen(false);
+              setActiveVideoUrl(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
     </div>
+  );
+}
+
+function VideoStudioOverlay({
+  sessionId,
+  studentId,
+  activeVideoUrl,
+  setActiveVideoUrl,
+  currentTranscriptLine,
+  onClose,
+}: {
+  sessionId: Id<"sessions">;
+  studentId: string;
+  activeVideoUrl: string | null;
+  setActiveVideoUrl: (url: string | null) => void;
+  currentTranscriptLine: string | null;
+  onClose: () => void;
+}) {
+  const [prompt, setPrompt] = useState("");
+  const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
+  const [isSubmittingTranscript, setIsSubmittingTranscript] = useState(false);
+  const prevVideoRequestsRef = useRef<string | null>(null);
+
+  const videoRequests = useQuery(api.videos.listStudentVideoRequests, {
+    sessionId,
+    studentId,
+    limit: 10,
+  });
+  const createFromTranscript = useMutation(api.videos.createVideoFromTranscript);
+  const createFromPrompt = useMutation(api.videos.createVideoFromStudentPrompt);
+
+  // Auto-show the latest completed video when it transitions to "completed"
+  useEffect(() => {
+    if (!videoRequests || videoRequests.length === 0) return;
+    const latest = videoRequests[videoRequests.length - 1];
+    const latestKey = `${latest._id}-${latest.status}`;
+    if (
+      latest.status === "completed" &&
+      latest.videoUrl &&
+      prevVideoRequestsRef.current !== latestKey
+    ) {
+      setActiveVideoUrl(latest.videoUrl);
+    }
+    prevVideoRequestsRef.current = latestKey;
+  }, [videoRequests, setActiveVideoUrl]);
+
+  const handleTranscriptVideo = async () => {
+    if (isSubmittingTranscript) return;
+    setIsSubmittingTranscript(true);
+    setActiveVideoUrl(null);
+    try {
+      await createFromTranscript({ sessionId, studentId });
+    } catch (error) {
+      console.error("Failed to create transcript video request:", error);
+    } finally {
+      setIsSubmittingTranscript(false);
+    }
+  };
+
+  const handleCustomPromptVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim() || isSubmittingCustom) return;
+    setIsSubmittingCustom(true);
+    setActiveVideoUrl(null);
+    try {
+      await createFromPrompt({ sessionId, studentId, prompt: prompt.trim() });
+      setPrompt("");
+    } catch (error) {
+      console.error("Failed to create custom video request:", error);
+    } finally {
+      setIsSubmittingCustom(false);
+    }
+  };
+
+  const latestRequest = videoRequests && videoRequests.length > 0
+    ? videoRequests[videoRequests.length - 1]
+    : null;
+  const isGenerating =
+    latestRequest?.status === "queued" || latestRequest?.status === "processing";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-ink/20 backdrop-blur-[2px] z-40 flex flex-col"
+    >
+      {/* Main card area - centered above the ticker */}
+      <div className="flex-1 flex items-center justify-center px-4 py-2 overflow-hidden">
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          transition={{ type: "spring", bounce: 0.12, duration: 0.45 }}
+          className="bg-white border-2 border-ink rounded-[2rem] shadow-comic w-full max-w-3xl max-h-[calc(100vh-100px)] overflow-hidden flex flex-col"
+        >
+          {/* Header */}
+          <div className="px-5 py-4 border-b-2 border-ink bg-deep-purple/10 flex items-center justify-between shrink-0">
+            <h2 className="font-black text-xl flex items-center gap-3">
+              <div className="w-9 h-9 bg-deep-purple rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
+                <Clapperboard className="w-4 h-4 text-white" />
+              </div>
+              Video Studio
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-black/5 rounded-full transition-colors group"
+            >
+              <div className="w-5 h-5 relative flex items-center justify-center">
+                <div className="absolute w-full h-0.5 bg-ink rotate-45 group-hover:bg-coral transition-colors" />
+                <div className="absolute w-full h-0.5 bg-ink -rotate-45 group-hover:bg-coral transition-colors" />
+              </div>
+            </button>
+          </div>
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-5 space-y-4">
+              {/* Inline Video Player / Generating State / Empty State */}
+              {activeVideoUrl ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <video
+                    src={activeVideoUrl}
+                    controls
+                    autoPlay
+                    className="w-full rounded-2xl border-2 border-ink shadow-comic bg-black"
+                    style={{ maxHeight: "350px" }}
+                  />
+                </motion.div>
+              ) : isGenerating ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-deep-purple/5 border-2 border-dashed border-deep-purple/30 rounded-2xl flex flex-col items-center justify-center py-12 gap-3"
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Clapperboard className="w-10 h-10 text-deep-purple" />
+                  </motion.div>
+                  <p className="font-black text-lg text-ink">Generating your video...</p>
+                  <div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-deep-purple rounded-full"
+                        animate={{ scale: [1, 1.4, 1] }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          delay: i * 0.15,
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Show the optimized prompt while generating */}
+                  {latestRequest?.optimizedPrompt && (
+                    <p className="text-xs text-slate-500 text-center px-6 mt-2 italic max-w-md">
+                      &ldquo;{latestRequest.optimizedPrompt}&rdquo;
+                    </p>
+                  )}
+                </motion.div>
+              ) : (
+                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center py-12 gap-2">
+                  <Clapperboard className="w-10 h-10 text-slate-300" />
+                  <p className="font-bold text-slate-400 text-center text-sm">
+                    Generate a video from your lecture or type a custom prompt
+                  </p>
+                </div>
+              )}
+
+              {/* Error display */}
+              {latestRequest?.status === "failed" && latestRequest.error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border-2 border-red-200 rounded-xl p-3 flex items-start gap-2"
+                >
+                  <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                  <p className="text-sm font-bold text-red-700">{latestRequest.error}</p>
+                </motion.div>
+              )}
+
+              {/* Generation Controls */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleTranscriptVideo}
+                  disabled={isSubmittingTranscript || isGenerating}
+                  className="w-full bg-soft-purple border-2 border-ink rounded-xl px-5 py-3.5 font-black text-ink shadow-comic-sm btn-press flex items-center justify-center gap-3 disabled:opacity-50 text-base"
+                >
+                  {isSubmittingTranscript || (isGenerating && latestRequest?.triggerType === "transcript") ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Wand2 className="w-5 h-5" />
+                  )}
+                  <span>Generate from Current Lecture</span>
+                </button>
+
+                <div className="flex items-center gap-3 opacity-40">
+                  <div className="flex-1 h-0.5 bg-ink/20" />
+                  <span className="text-xs font-black uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-0.5 bg-ink/20" />
+                </div>
+
+                <form onSubmit={handleCustomPromptVideo} className="flex gap-2">
+                  <input
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder='e.g. "Explain gravity with a visual simulation"'
+                    className="flex-1 px-4 py-3.5 bg-white border-2 border-ink rounded-xl outline-none font-bold text-sm placeholder:text-slate-400 focus:shadow-comic-sm transition-all"
+                    disabled={isGenerating}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!prompt.trim() || isSubmittingCustom || isGenerating}
+                    className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-black disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubmittingCustom ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                    <span className="hidden sm:inline">Generate</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Past Videos */}
+              {videoRequests && videoRequests.length > 0 && (
+                <div className="pt-2">
+                  <h4 className="font-black text-xs uppercase tracking-wider text-slate-400 mb-3">
+                    Previous Generations
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[...videoRequests].reverse().map((request) => {
+                      const isActive = activeVideoUrl === request.videoUrl;
+                      const statusStyle =
+                        request.status === "completed"
+                          ? "bg-green-100 text-green-700"
+                          : request.status === "failed"
+                            ? "bg-red-100 text-red-700"
+                            : request.status === "processing"
+                              ? "bg-mustard/40 text-ink"
+                              : "bg-slate-100 text-slate-600";
+
+                      return (
+                        <button
+                          key={request._id}
+                          onClick={() => {
+                            if (request.status === "completed" && request.videoUrl) {
+                              setActiveVideoUrl(request.videoUrl);
+                            }
+                          }}
+                          disabled={request.status !== "completed"}
+                          className={clsx(
+                            "text-left bg-white border-2 rounded-xl p-3 transition-all",
+                            request.status === "completed"
+                              ? "border-ink hover:shadow-comic-sm cursor-pointer"
+                              : "border-slate-200 opacity-60 cursor-default",
+                            isActive && "ring-2 ring-deep-purple ring-offset-2"
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                              {request.triggerType === "transcript" ? "Lecture" : "Prompt"}
+                            </span>
+                            <span className={clsx("text-[10px] px-1.5 py-0.5 rounded-full font-black", statusStyle)}>
+                              {request.status}
+                            </span>
+                          </div>
+                          <p className="text-xs font-bold text-ink line-clamp-2">
+                            {request.studentPrompt ?? request.sourcePrompt}
+                          </p>
+                          {request.optimizedPrompt && (
+                            <p className="text-[10px] mt-1 text-slate-400 line-clamp-1 italic">
+                              {request.optimizedPrompt}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Live Transcript Ticker - pinned to bottom */}
+      <div className="shrink-0 px-4 pb-5 pt-1">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-3xl mx-auto"
+        >
+          {currentTranscriptLine ? (
+            <div className="bg-white/90 backdrop-blur-md border-2 border-ink rounded-2xl px-5 py-3 shadow-comic-sm flex items-center gap-3">
+              <div className="shrink-0 flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live</span>
+              </div>
+              <p className="font-bold text-ink text-base truncate">
+                {currentTranscriptLine}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white/60 backdrop-blur-md border-2 border-dashed border-slate-300 rounded-2xl px-5 py-3 flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-slate-300" />
+              <p className="font-bold text-slate-400 text-sm">
+                Waiting for teacher to speak...
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 

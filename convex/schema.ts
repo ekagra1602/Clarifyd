@@ -74,4 +74,28 @@ export default defineSchema({
     answer: v.optional(v.string()), // AI-generated answer
     createdAt: v.number(),
   }).index("by_session", ["sessionId", "createdAt"]),
+
+  // Student video generation requests (lecture context + custom prompts)
+  videoRequests: defineTable({
+    sessionId: v.id("sessions"),
+    studentId: v.string(),
+    triggerType: v.union(v.literal("transcript"), v.literal("custom_prompt")),
+    studentPrompt: v.optional(v.string()),
+    sourcePrompt: v.string(), // Raw prompt before Claude optimization
+    optimizedPrompt: v.optional(v.string()), // Claude-converted Veo prompt
+    status: v.union(
+      v.literal("queued"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+    provider: v.optional(v.string()),
+    videoUrl: v.optional(v.string()),
+    providerRequestId: v.optional(v.string()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_session_student", ["sessionId", "studentId", "createdAt"])
+    .index("by_status", ["status", "createdAt"]),
 });

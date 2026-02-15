@@ -2,6 +2,7 @@
 
 - Live transcription display (AssemblyAI Universal Streaming)
 - AI-powered Q&A (Claude Sonnet 4)
+- Student video generation from lecture context or custom prompts
 - Teacher-triggered comprehension quizzes (AI-generated from transcript content since last quiz)
 - "I'm lost" signals with spike detection
 - QR code join for students
@@ -73,6 +74,8 @@ These must be set in the [Convex Dashboard](https://dashboard.convex.dev) under 
 |----------|----------|----------|
 | `CLAUDE_API_KEY` | Yes | [Anthropic Console](https://console.anthropic.com/settings/keys) |
 | `ASSEMBLYAI_API_KEY` | Yes | [AssemblyAI Dashboard](https://www.assemblyai.com/dashboard) |
+| `VEO_API_KEY` | Yes (for video feature) | Your Veo provider key |
+| `VEO_MODEL` | No | Veo model name (default `veo-3.1-fast-generate-preview`) |
 | `TRANSCRIPTION_SECRET` | Yes | Generate: `openssl rand -base64 32` |
 | `TOKEN_COMPANY_API_KEY` | No | [Token Company](https://tokencompany.com) |
 | `COMPRESSION_ENABLED` | No | Set to `"false"` to disable prompt compression |
