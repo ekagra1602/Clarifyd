@@ -10,6 +10,13 @@ load_dotenv()
 # Initialize FastMCP server
 mcp = FastMCP("TreeHacks Education Agent")
 
+# Initialize Convex Client
+try:
+    from convex_client import client as convex_client
+except ImportError:
+    convex_client = None
+    print("Warning: Could not import convex_client. Ensure agent/convex_client.py exists.")
+
 # --- Models ---
 
 class StudentProfile(BaseModel):
@@ -60,8 +67,27 @@ def generate_teacher_insights(recent_questions: List[str]) -> str:
     if not recent_questions:
         return "No recent questions to analyze."
         
-    # Placeholder for clustering logic
-    return f"Cluster: {len(recent_questions)} students asked about related topics."
+    # In a real scenario, we'd fetch from Convex if not provided, 
+    # but here we process the list provided by the tool call (which might come from the frontend or another tool).
+    # If the list is empty/placeholder strings, we can try to fetch from Convex.
+    
+    if len(recent_questions) == 1 and recent_questions[0].startswith("FETCH_FROM_CONVEX:"):
+        # Protocol: If the argument is a specific string, fetch from DB
+        session_id = recent_questions[0].split(":")[1]
+        try:
+            # Assuming we have a query `api.questions.listRecentQuestions`
+            # We need to map this to the actual Convex query
+            questions_data = convex_client.query("questions:listRecentQuestions", {"sessionId": session_id, "limit": 10})
+            real_questions = [q["question"] for q in questions_data]
+            if not real_questions:
+                 return f"No questions found in session {session_id}."
+            
+            # Simple clustering simulation
+            return f"Analyzed {len(real_questions)} questions from session {session_id}. Common theme: {real_questions[0]}..."
+        except Exception as e:
+            return f"Error fetching questions: {str(e)}"
+
+    return f"Cluster: {len(recent_questions)} questions provided. Topics appear varied."
 
 @mcp.tool()
 def check_library_for_answer(question: str) -> Optional[str]:
