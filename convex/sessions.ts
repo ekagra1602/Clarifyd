@@ -33,6 +33,12 @@ export const createSession = mutation({
     instructorAvatar: v.optional(v.object({
       style: v.optional(v.string()),
       seed: v.optional(v.string()),
+      // Legacy SVG fields for backwards-compat
+      hairStyle: v.optional(v.string()),
+      hairColor: v.optional(v.string()),
+      eyes: v.optional(v.string()),
+      skinTone: v.optional(v.string()),
+      accessory: v.optional(v.string()),
     })),
   },
   handler: async (ctx, args) => {

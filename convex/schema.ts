@@ -10,10 +10,17 @@ const questionSchema = v.object({
   conceptTag: v.string(),
 });
 
-// DiceBear avatar shape (style + seed)
+// Avatar shape — DiceBear (style + seed) with legacy SVG fields kept optional for
+// backwards-compatibility with existing documents created before the migration.
 const avatarSchema = v.optional(v.object({
   style: v.optional(v.string()),
   seed: v.optional(v.string()),
+  // Legacy SVG avatar fields (old documents may still have these)
+  hairStyle: v.optional(v.string()),
+  hairColor: v.optional(v.string()),
+  eyes: v.optional(v.string()),
+  skinTone: v.optional(v.string()),
+  accessory: v.optional(v.string()),
 }));
 
 export default defineSchema({

@@ -814,13 +814,6 @@ function TranscriptView({
                         : "opacity-40 scale-[0.98] origin-left"
                     )}
                   >
-                    {line.source && isRecent && (
-                      <div className="mb-2 inline-flex items-center">
-                        <span className="px-2 py-1 text-[10px] font-extrabold tracking-widest uppercase rounded-lg border-2 border-ink bg-white">
-                          {line.source}
-                        </span>
-                      </div>
-                    )}
                     <p className={clsx(
                       "font-bold leading-tight transition-all duration-500",
                       isRecent ? "text-3xl md:text-4xl text-ink" : "text-xl md:text-2xl text-slate-500"
