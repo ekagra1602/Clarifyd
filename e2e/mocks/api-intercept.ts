@@ -1,36 +1,36 @@
 import { Page } from "@playwright/test";
-import { mockGeminiAPI } from "./gemini.mock";
+import { mockClaudeAPI } from "./claude.mock";
 
 export interface MockOptions {
-  mockGemini?: boolean;
-  geminiResponseType?: "quiz" | "qa" | "lost" | "summary";
+  mockClaude?: boolean;
+  claudeResponseType?: "quiz" | "qa" | "lost" | "summary";
 }
 
 export async function setupMocks(page: Page, options: MockOptions = {}) {
-  const { mockGemini = true, geminiResponseType = "qa" } = options;
+  const { mockClaude = true, claudeResponseType = "qa" } = options;
 
-  if (mockGemini) {
-    await mockGeminiAPI(page, geminiResponseType);
+  if (mockClaude) {
+    await mockClaudeAPI(page, claudeResponseType);
   }
 }
 
 /**
- * Setup mocks for quiz flow - intercepts Gemini API for quiz generation
+ * Setup mocks for quiz flow - intercepts Claude API for quiz generation
  */
 export async function setupQuizMocks(page: Page) {
-  await setupMocks(page, { mockGemini: true, geminiResponseType: "quiz" });
+  await setupMocks(page, { mockClaude: true, claudeResponseType: "quiz" });
 }
 
 /**
- * Setup mocks for Q&A flow - intercepts Gemini API for Q&A answers
+ * Setup mocks for Q&A flow - intercepts Claude API for Q&A answers
  */
 export async function setupQAMocks(page: Page) {
-  await setupMocks(page, { mockGemini: true, geminiResponseType: "qa" });
+  await setupMocks(page, { mockClaude: true, claudeResponseType: "qa" });
 }
 
 /**
- * Setup mocks for lost signal flow - intercepts Gemini API for lost summaries
+ * Setup mocks for lost signal flow - intercepts Claude API for lost summaries
  */
 export async function setupLostMocks(page: Page) {
-  await setupMocks(page, { mockGemini: true, geminiResponseType: "lost" });
+  await setupMocks(page, { mockClaude: true, claudeResponseType: "lost" });
 }

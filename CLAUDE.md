@@ -11,7 +11,7 @@ WaitWhat is a Convex-powered real-time lecture engagement platform. Teachers sta
 - **Backend**: Convex (real-time database, mutations/queries, no custom WebSocket needed)
 - **Frontend**: React (Teacher Console + Student UI)
 - **Transcription**: AssemblyAI real-time streaming (browser → AssemblyAI WebSocket → Convex mutation)
-- **AI**: Gemini 2.5 Flash for Q&A, quiz generation, lost summaries, and session notes
+- **AI**: Claude Sonnet 4 for Q&A, quiz generation, lost summaries, and session notes
 
 ## Architecture
 
@@ -64,7 +64,7 @@ The system uses Convex's real-time subscriptions for all live updates. Clients s
 ### AI Service Architecture
 
 The AI system lives in `convex/ai/` with these components:
-- `service.ts` - Unified Gemini API wrapper for all AI features
+- `service.ts` - Unified Claude API wrapper for all AI features
 - `prompts.ts` - System prompts and prompt builders for each feature type
 - `compression.ts` - Token Company API integration for prompt compression
 - `context.ts` - Context builder combining slides + transcript + Q&A

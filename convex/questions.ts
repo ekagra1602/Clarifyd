@@ -93,7 +93,7 @@ export const generateAnswer = internalAction({
     }
 
     // Call unified AI service
-    const result = await ctx.runAction(internal.ai.service.callGemini, {
+    const result = await ctx.runAction(internal.ai.service.callClaude, {
       featureType: "qa_answer",
       sessionId: question.sessionId,
       questionId: args.questionId,
@@ -122,7 +122,7 @@ export const generateQuestionSummary = internalAction({
     ctx,
     args
   ): Promise<{ success: boolean; summary: string; themes: QuestionTheme[] }> => {
-    const result: AIResponse = await ctx.runAction(internal.ai.service.callGemini, {
+    const result: AIResponse = await ctx.runAction(internal.ai.service.callClaude, {
       featureType: "question_summary",
       sessionId: args.sessionId,
       timeWindowMinutes: args.timeWindowMinutes ?? 30,

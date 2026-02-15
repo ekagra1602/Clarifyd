@@ -2,7 +2,7 @@
  * Integration tests for AI Quiz Generation feature
  *
  * Tests the flow of generating quizzes using AI when teachers request them.
- * Note: Actual Gemini API calls cannot be tested without API keys;
+ * Note: Actual Claude API calls cannot be tested without API keys;
  * these tests focus on the scheduling and integration flow.
  */
 import { convexTest } from "convex-test";

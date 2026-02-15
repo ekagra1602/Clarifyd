@@ -4,7 +4,7 @@ import { TeacherSessionPage } from "../pages/teacher-session.page";
 import { JoinPage } from "../pages/join.page";
 import { StudentSessionPage } from "../pages/student-session.page";
 
-// Note: Quiz tests require GEMINI_API_KEY to be configured in Convex backend
+// Note: Quiz tests require CLAUDE_API_KEY to be configured in Convex backend
 // Quiz generation happens server-side and cannot be mocked from browser
 test.describe("Quiz Flow", () => {
   test("full quiz lifecycle: launch, answer, close", async ({ browser }) => {
@@ -37,7 +37,7 @@ test.describe("Quiz Flow", () => {
       const studentSession = new StudentSessionPage(studentPage);
       await studentSession.waitForLive();
 
-      // Teacher launches quiz (requires Gemini API key)
+      // Teacher launches quiz (requires Claude API key)
       await teacherSession.launchQuiz();
 
       // Student sees quiz modal

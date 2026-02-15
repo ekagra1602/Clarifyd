@@ -104,26 +104,23 @@ export interface AIResponse {
 }
 
 // ==========================================
-// Gemini API Types
+// Claude API Types
 // ==========================================
 
-export interface GeminiPart {
+export interface ClaudeContentBlock {
+  type: string;
   text?: string;
-  thought?: boolean;
 }
 
-export interface GeminiCandidate {
-  content?: {
-    parts?: GeminiPart[];
-  };
-  finishReason?: string;
+export interface ClaudeResponse {
+  id?: string;
+  type?: string;
+  role?: string;
+  content?: ClaudeContentBlock[];
+  stop_reason?: string | null;
 }
 
-export interface GeminiResponse {
-  candidates?: GeminiCandidate[];
-}
-
-export interface GeminiGenerationConfig {
+export interface ClaudeGenerationConfig {
   temperature: number;
   maxOutputTokens: number;
   thinkingConfig?: {
