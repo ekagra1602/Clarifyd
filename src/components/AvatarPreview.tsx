@@ -1,9 +1,7 @@
 import {
-  HAIR_STYLES,
   HAIR_COLORS,
   EYES_OPTIONS,
   SKIN_TONES,
-  ACCESSORIES,
   type AvatarShape,
 } from "../lib/avatarOptions";
 
@@ -12,7 +10,8 @@ function getHex(id: string, list: readonly { id: string; hex?: string }[]): stri
   return (found as { hex?: string })?.hex ?? "#6b7280";
 }
 
-export function AvatarPreview({ avatar }: { avatar: AvatarShape }) {
+
+export function AvatarPreview({ avatar, size = "md" }: { avatar: AvatarShape; size?: "sm" | "md" | "lg" | "xl" }) {
   const skinHex = getHex(avatar.skinTone, SKIN_TONES);
   const hairHex = getHex(avatar.hairColor, HAIR_COLORS);
 
@@ -20,10 +19,17 @@ export function AvatarPreview({ avatar }: { avatar: AvatarShape }) {
   const showGlasses = avatar.accessory === "glasses";
   const hairStyle = avatar.hairStyle || "short";
 
+  const sizeClass = {
+    sm: "w-10 h-10",
+    md: "w-32 h-36",
+    lg: "w-48 h-56",
+    xl: "w-64 h-72"
+  }[size];
+
   return (
     <svg
       viewBox="0 0 120 140"
-      className="w-32 h-36 mx-auto"
+      className={`${sizeClass} mx-auto`}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >

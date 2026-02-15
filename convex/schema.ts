@@ -19,6 +19,15 @@ export default defineSchema({
     createdAt: v.number(),
     contextText: v.optional(v.string()), // Uploaded slides/context for AI
     activeQuizId: v.optional(v.id("quizzes")), // Currently active quiz
+    instructorName: v.optional(v.string()), // Teacher's name
+    instructorAvatar: v.optional(v.object({
+      hairStyle: v.optional(v.string()),
+      hairColor: v.optional(v.string()),
+      eyes: v.optional(v.string()),
+      skinTone: v.optional(v.string()),
+      accessory: v.optional(v.string()),
+    })),
+
   }).index("by_code", ["code"]),
 
   // Transcript segments - append-only for real-time performance
