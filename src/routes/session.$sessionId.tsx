@@ -329,8 +329,7 @@ function StudentSessionPage() {
             onClose={() => setIsQAOpen(false)}
             instructorName={session.instructorName}
             instructorAvatar={session.instructorAvatar}
-            instructorName={session.instructorName}
-            instructorAvatar={session.instructorAvatar}
+
           />
         )}
       </AnimatePresence>
@@ -836,7 +835,6 @@ function TranscriptView({
 
 import { AvatarPreview } from "../components/AvatarPreview";
 
-import { AvatarPreview } from "../components/AvatarPreview";
 
 function ChatOverlay({
   sessionId,
@@ -844,8 +842,6 @@ function ChatOverlay({
   questions,
   currentTranscriptLine,
   onClose,
-  instructorName,
-  instructorAvatar
   instructorName,
   instructorAvatar
 }: {
@@ -919,14 +915,14 @@ function ChatOverlay({
             <h2 className="font-black text-xl flex items-center gap-3">
               <div className="w-9 h-9 bg-coral rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
                 {instructorAvatar ? (
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-ink bg-white">
-                <AvatarPreview avatar={instructorAvatar} size="sm" />
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-ink bg-white">
+                    <AvatarPreview avatar={instructorAvatar} size="sm" />
+                  </div>
+                ) : (
+                  <Sparkles className="w-4 h-4 text-white fill-current" />
+                )}
               </div>
-            ) : (
-              <Sparkles className="w-4 h-4 text-white fill-current" />
-              </div>
-              )}
-            {instructorName || "AI Assistant"}
+              {instructorName || "AI Assistant"}
             </h2>
             <button
               onClick={onClose}
@@ -959,43 +955,33 @@ function ChatOverlay({
                     </div>
                   </div>
 
-                {/* AI Answer */}
-                <div className="flex justify-start">
-                  {q.answer ? (
-                    <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 mb-1 opacity-70">
-                        {instructorAvatar ? (
-                          <div className="w-4 h-4 rounded-full overflow-hidden border border-ink bg-white">
-                            <AvatarPreview avatar={instructorAvatar} size="sm" />
-                          </div>
-                        ) : (
-                          <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
-                        )}
-                        <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
+                  {/* AI Answer */}
+                  <div className="flex justify-start">
+                    {q.answer ? (
+
+                      <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 mb-1 opacity-70">
+                          {instructorAvatar ? (
+                            <div className="w-4 h-4 rounded-full overflow-hidden border border-ink bg-white">
+                              <AvatarPreview avatar={instructorAvatar} size="sm" />
+                            </div>
+                          ) : (
+                            <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
+                          )}
+                          <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
+                        </div>
+                        {q.answer}
                       </div>
-                    <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%] flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 mb-1 opacity-70">
-                        {instructorAvatar ? (
-                          <div className="w-4 h-4 rounded-full overflow-hidden border border-ink bg-white">
-                            <AvatarPreview avatar={instructorAvatar} size="sm" />
-                          </div>
-                        ) : (
-                          <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
-                        )}
-                        <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
+                    ) : (
+                      <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
                       </div>
-                      {q.answer}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
 
           {/* Input Area */}
           <div className="p-4 border-t-2 border-ink bg-white shrink-0">
