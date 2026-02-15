@@ -1,0 +1,7 @@
+{
+  "project": "waitwhat",
+  "team": "carter-tran",
+  "node": {
+    "externalPackages": ["officeparser", "pdfjs-dist", "mammoth"]
+  }
+}
