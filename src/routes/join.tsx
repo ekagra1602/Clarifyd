@@ -49,9 +49,9 @@ function JoinPage() {
   return (
     <div className="min-h-screen bg-lavender-bg py-20 px-6 flex items-center justify-center">
       <div className="max-w-md w-full mx-auto bg-white p-8 rounded-[2.5rem] shadow-comic border-2 border-ink relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-coral/20 rounded-bl-[100px] -z-0" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-soft-purple/15 rounded-tr-[100px] -z-0" />
 
-        <h1 className="text-4xl font-black text-ink text-center mb-4 relative z-10">
+        <h1 className="text-4xl font-extrabold text-ink text-center mb-4 relative z-10">
           Join Session
         </h1>
         <p className="text-slate-500 font-bold text-center mb-10 relative z-10">
@@ -65,17 +65,17 @@ function JoinPage() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="e.g. blue-tiger-42"
-              className="w-full px-4 py-5 bg-white border-2 border-ink rounded-2xl text-ink placeholder-slate-300 outline-none focus:border-coral focus:shadow-comic transition-all text-center text-xl font-black font-mono"
+              className="w-full px-4 py-5 bg-white border-2 border-ink rounded-2xl text-ink placeholder-slate-300 outline-none focus:border-coral focus:shadow-comic transition-all text-center text-xl font-extrabold font-mono"
             />
             {error && (
-              <p className="mt-2 text-coral font-bold text-sm text-center border-2 border-coral bg-coral/10 py-2 rounded-lg">{error}</p>
+              <p className="mt-2 text-red-600 font-bold text-sm text-center border-2 border-red-300 bg-red-50 py-2 rounded-lg">{error}</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={isJoining}
-            className="w-full inline-flex items-center justify-center gap-3 px-8 py-5 bg-mustard hover:bg-mustard/90 disabled:opacity-50 text-ink font-black rounded-2xl border-2 border-ink shadow-comic text-xl btn-press"
+            className="w-full inline-flex items-center justify-center gap-3 px-8 py-5 bg-coral hover:bg-coral-dark disabled:opacity-50 text-white font-extrabold rounded-2xl border-2 border-ink shadow-comic text-xl btn-press"
           >
             {isJoining ? (
               <>

@@ -1,33 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 
   /* Backgrounds */
-  --color-lavender-bg: #E0DEF7;
-  /* Main page background */
-  --color-milk: #FDFBFF;
+  --color-lavender-bg: #F0F4FF;
+  /* Main page background — soft periwinkle-white */
+  --color-milk: #FFFFFF;
   /* Card background */
 
   /* Brand Colors */
-  --color-coral: #FF6B4A;
-  --color-coral-dark: #E85D3F;
-  --color-mustard: #FCD34D;
-  --color-soft-purple: #C4B5FD;
-  --color-deep-purple: #8B5CF6;
+  --color-coral: #6366F1;
+  /* Indigo — primary action */
+  --color-coral-dark: #4F46E5;
+  --color-coral-light: #818CF8;
+  --color-mustard: #F59E0B;
+  /* Amber — warm secondary */
+  --color-mustard-light: #FCD34D;
+  --color-soft-purple: #34D399;
+  /* Emerald — fresh tertiary */
+  --color-deep-purple: #059669;
+  /* Emerald-deep */
 
   /* Text */
-  --color-ink: #111827;
+  --color-ink: #1E293B;
+  /* Slate-800 — softer than pure black */
 
   /* Utilities */
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
 
-  /* Shadows specific to this art style (hard shadows) */
-  --shadow-comic: 4px 4px 0px 0px #111827;
-  --shadow-comic-hover: 6px 6px 0px 0px #111827;
-  --shadow-comic-sm: 2px 2px 0px 0px #111827;
+  /* Shadows — lighter, softer comic style */
+  --shadow-comic: 3px 3px 0px 0px #94A3B8;
+  --shadow-comic-hover: 5px 5px 0px 0px #94A3B8;
+  --shadow-comic-sm: 2px 2px 0px 0px #CBD5E1;
+  --shadow-comic-lg: 4px 4px 0px 0px #94A3B8;
 }
 
 body {
@@ -35,9 +43,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom Scrollbar for playful feel */
+/* Custom Scrollbar — minty feel */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -45,25 +53,42 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #C4B5FD;
+  background: #34D399;
   border-radius: 10px;
-  border: 3px solid #E0DEF7;
+  border: 3px solid #F0F4FF;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8B5CF6;
+  background: #059669;
 }
 
-/* Base button styles we can reuse */
+/* Base button styles */
 .btn-primary {
   @apply bg-coral text-white font-bold px-6 py-3 rounded-xl border-2 border-ink shadow-comic transition-all duration-200 hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-1 active:translate-y-1 active:shadow-none;
 }
 
-/* Reusable animation class for any element */
+/* Reusable press effect */
 .btn-press {
   @apply transition-all duration-200 hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-x-1 active:translate-y-1 active:shadow-none;
 }
 
 .card-base {
   @apply bg-milk border-2 border-ink rounded-2xl shadow-comic;
+}
+
+/* Dots pattern for backgrounds */
+.bg-dots {
+  background-image: radial-gradient(circle, #94A3B8 0.5px, transparent 0.5px);
+  background-size: 16px 16px;
+}
+
+/* Checkered pattern */
+.bg-checkered {
+  background-image:
+    linear-gradient(45deg, #F0F4FF 25%, transparent 25%),
+    linear-gradient(-45deg, #F0F4FF 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #F0F4FF 75%),
+    linear-gradient(-45deg, transparent 75%, #F0F4FF 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }

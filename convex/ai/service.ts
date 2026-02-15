@@ -10,6 +10,7 @@ import {
   QuizGenerationResult,
   QuestionSummaryResult,
   LostSummaryResult,
+  TranslateResult,
 } from "./types";
 import {
   SYSTEM_PROMPTS,
@@ -19,6 +20,8 @@ import {
   buildQuizGenerationPrompt,
   buildQuestionSummaryPrompt,
   buildLostSummaryPrompt,
+  buildTranslatePrompt,
+  buildTranslateResponsePrompt,
 } from "./prompts";
 import { compressPrompts, compressText } from "./compression";
 
@@ -134,7 +137,9 @@ export const callClaude = internalAction({
       v.literal("qa_answer"),
       v.literal("quiz_generation"),
       v.literal("question_summary"),
-      v.literal("lost_summary")
+      v.literal("lost_summary"),
+      v.literal("translate_question"),
+      v.literal("translate_response")
     ),
     sessionId: v.id("sessions"),
 
@@ -157,6 +162,10 @@ export const callClaude = internalAction({
     // Lost summary specific
     studentId: v.optional(v.string()),
     recentMinutes: v.optional(v.number()),
+
+    // Translate response specific
+    answerText: v.optional(v.string()),
+    targetLanguage: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<AIResponse> => {
     const featureType = args.featureType as AIFeatureType;
@@ -242,6 +251,36 @@ export const callClaude = internalAction({
       case "lost_summary":
         userPrompt = buildLostSummaryPrompt(aiContext);
         break;
+
+      case "translate_question":
+        if (!args.questionText) {
+          return {
+            success: false,
+            featureType,
+            error: {
+              code: "CONTEXT_ERROR",
+              message: "questionText required for translation",
+            },
+          };
+        }
+        userPrompt = buildTranslatePrompt(args.questionText);
+        break;
+
+      case "translate_response":
+        if (!args.answerText || !args.targetLanguage) {
+          return {
+            success: false,
+            featureType,
+            error: {
+              code: "CONTEXT_ERROR",
+              message: "answerText and targetLanguage required for translation",
+            },
+          };
+        }
+        userPrompt = buildTranslateResponsePrompt(args.answerText, args.targetLanguage);
+        break;
+
+
     }
 
     // Compress prompts before calling Claude API
@@ -328,13 +367,39 @@ function parseResponse(
         };
       }
       // Parse structured lost summary from text response
-      const result: LostSummaryResult = {
+      const lostResult: LostSummaryResult = {
         summary: text,
         keyPoints: [],
         suggestedReview: "",
       };
-      return { success: true, featureType, lostSummaryResult: result };
+      return { success: true, featureType, lostSummaryResult: lostResult };
     }
+
+    case "translate_question": {
+      const parsed = extractJSONFromResponse<TranslateResult>(response);
+      if (!parsed?.translatedText) {
+        return {
+          success: false,
+          featureType,
+          error: { code: "PARSE_ERROR", message: "Invalid translation JSON structure" },
+        };
+      }
+      return { success: true, featureType, translateResult: parsed };
+    }
+
+    case "translate_response": {
+      const parsed = extractJSONFromResponse<TranslateResult>(response);
+      if (!parsed?.translatedText) {
+        return {
+          success: false,
+          featureType,
+          error: { code: "PARSE_ERROR", message: "Invalid translation JSON structure" },
+        };
+      }
+      return { success: true, featureType, translateResult: parsed };
+    }
+
+
   }
 }
 

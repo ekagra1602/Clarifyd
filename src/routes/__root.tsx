@@ -5,6 +5,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
+import logo from '../logo.png'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -17,7 +18,8 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'WaitWhat',
+        title: 'Clarifyd',
+        title: 'Clarifyd',
       },
     ],
     links: [
@@ -28,7 +30,7 @@ export const Route = createRootRoute({
       {
         rel: 'icon',
         type: 'image/png',
-        href: '/waitwhatthumbnail.png',
+        href: logo,
       },
     ],
   }),

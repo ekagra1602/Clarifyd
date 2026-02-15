@@ -1,6 +1,6 @@
-import { Id } from "../../convex/_generated/dataModel";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { useRealtimeTranscription } from "../hooks/useRealtimeTranscription";
+import { Id } from "../../convex/_generated/dataModel";
 
 export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions"> }) {
   const {
@@ -12,20 +12,19 @@ export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions">
   } = useRealtimeTranscription({ sessionId });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border-2 border-red-200 p-3 rounded-xl font-medium">
           {error}
         </div>
       )}
+
+      {/* Live mic transcription */}
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={isConnecting}
-        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 border-ink font-bold text-lg transition-all shadow-comic-sm hover:shadow-comic hover:-translate-y-0.5 active:translate-y-0 active:shadow-comic-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-comic-sm disabled:hover:translate-y-0 ${
-          isRecording
-            ? "bg-coral text-white"
-            : "bg-soft-purple text-white"
-        }`}
+        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 border-ink font-bold text-lg transition-all shadow-comic-sm hover:shadow-comic hover:-translate-y-0.5 active:translate-y-0 active:shadow-comic-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-comic-sm disabled:hover:translate-y-0 ${isRecording ? "bg-coral text-white" : "bg-soft-purple text-white"
+          }`}
       >
         {isConnecting ? (
           <>
@@ -44,9 +43,10 @@ export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions">
           </>
         )}
       </button>
+
       {isRecording && (
-        <div className="flex items-center gap-2 text-green-600 font-bold text-sm">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse border border-green-600" />
+        <div className="flex items-center gap-2 text-soft-purple font-bold text-sm">
+          <div className="w-3 h-3 bg-soft-purple rounded-full animate-pulse border border-deep-purple" />
           Live transcription active
         </div>
       )}

@@ -11,24 +11,24 @@ import {
   AlertCircle,
   ThumbsUp,
   Send,
-  CheckCircle2, // Used in "I'm Lost" button success state
-  MessageCircle, // Used in Q&A button
-  Users, // Used in header
-  Download // Used in notes download
+  CheckCircle2,
+  MessageCircle,
+  Users,
+  Download,
+  Clapperboard,
+  Wand2,
+  XCircle,
+  Globe,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { LeaderboardModal } from "../components/LeaderboardModal";
 import { ProfileOnboardingModal } from "../components/ProfileOnboardingModal";
 
-// ... imports kept same, ensuring used icons are available ...
-// Assuming imports are sufficient or will be auto-fixed, but let's check existing imports.
-// We need: MessageCircle, Users, CheckCircle2, AlertCircle, Send, Loader2, etc. (Already there)
-// Adding X for close button if not present? It's not in the original imports. 
-// I'll stick to using existing imports or add X if needed. The original had "rotate-45" divs for close.
-
 export const Route = createFileRoute("/session/$sessionId")({
   component: StudentSessionPage,
+  ssr: false,
 });
 
 function StudentSessionPage() {
@@ -37,6 +37,8 @@ function StudentSessionPage() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [isQAOpen, setIsQAOpen] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
@@ -44,7 +46,6 @@ function StudentSessionPage() {
 
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
   const generateSessionNotesAction = useAction(api.ai.service.generateSessionNotes);
-  // const askQuestion = useMutation(api.questions.askQuestion); // Unused
 
   const handleDownloadNotes = async () => {
     setIsGeneratingNotes(true);
@@ -71,7 +72,6 @@ function StudentSessionPage() {
   };
 
   useEffect(() => {
-    // Try local storage first, fallback to session storage
     const stored = localStorage.getItem(`studentId-${sessionId}`) || sessionStorage.getItem(`studentId-${sessionId}`);
     if (stored) {
       setStudentId(stored);
@@ -98,7 +98,6 @@ function StudentSessionPage() {
   const session = useQuery(api.sessions.getSession, {
     sessionId: sessionId as Id<"sessions">,
   });
-  // Use paginated transcript for windowed loading with infinite scroll
   const paginatedTranscript = usePaginatedTranscript(sessionId as Id<"sessions">);
   const activeQuiz = useQuery(api.quizzes.getActiveQuiz, {
     sessionId: sessionId as Id<"sessions">,
@@ -131,7 +130,7 @@ function StudentSessionPage() {
           <div className="w-20 h-20 bg-mustard/20 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-ink">
             <CheckCircle2 className="w-10 h-10 text-ink" />
           </div>
-          <h1 className="text-2xl font-black mb-2">That's a wrap!</h1>
+          <h1 className="text-2xl font-extrabold mb-2">That's a wrap!</h1>
           <p className="text-slate-500 font-bold mb-6">
             The lecture has ended. Great work today.
           </p>
@@ -162,14 +161,12 @@ function StudentSessionPage() {
     if (!studentId) return;
     const isCurrentlyLost = studentState?.isLost;
 
-    // Always toggle status
     await setLostStatus({
       sessionId: sessionId as Id<"sessions">,
       studentId,
       isLost: !isCurrentlyLost,
     });
 
-    // If becoming lost, open chat (the backend will auto-post the question and generate summary)
     if (!isCurrentlyLost) {
       setIsQAOpen(true);
     }
@@ -219,40 +216,43 @@ function StudentSessionPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative h-full transition-all duration-300">
 
-        {/* Header - Absolute Top Right */}
-        <div className="absolute top-6 right-6 z-10 flex items-center gap-3">
-          <button
-            onClick={() => setShowProfileModal(true)}
-            className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
-            title="Profile"
-          >
-            <span className="text-sm">Profile</span>
-          </button>
-          <button
-            onClick={() => setShowLeaderboard(true)}
-            className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
-            title="Leaderboard"
-          >
-            <span>🔥</span>
-            <span className="text-sm tabular-nums">{studentState?.currentStreak ?? 0}</span>
-          </button>
-          {/* Room Name - Hidden on small screens or when chat is open if constrained */}
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 hidden lg:flex">
-            {session.roomName || "Classroom"}
+        {/* Header - Absolute Top Left & Right */}
+        <div className="absolute top-6 left-6 right-6 z-10 flex items-center justify-between">
+          {/* Left side: Room name + LIVE */}
+          <div className="flex items-center gap-3">
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-extrabold text-ink flex items-center justify-center gap-2">
+              <div className="w-3 h-3 bg-soft-purple rounded-full animate-pulse border border-ink" />
+              <span className="text-sm tracking-wide">LIVE</span>
+            </div>
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink hidden lg:flex items-center gap-2">
+              {session.roomName || "Classroom"}
+            </div>
           </div>
 
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2">
-            <div className="w-3 h-3 bg-coral rounded-full animate-pulse border border-ink" />
-            <span className="text-sm tracking-wide">LIVE</span>
-          </div>
-
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 min-w-[80px]">
-            <Users className="w-5 h-5 text-ink" />
-            <span>{studentCount ?? "..."}</span>
-          </div>
-
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 font-mono">
-            #{session.code}
+          {/* Right side: Stats + profile */}
+          <div className="flex items-center gap-3">
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 font-mono">
+              #{session.code}
+            </div>
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 min-w-[80px]">
+              <Users className="w-5 h-5 text-ink" />
+              <span>{studentCount ?? "..."}</span>
+            </div>
+            <button
+              onClick={() => setShowLeaderboard(true)}
+              className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
+              title="Leaderboard"
+            >
+              <span>🔥</span>
+              <span className="text-sm tabular-nums">{studentState?.currentStreak ?? 0}</span>
+            </button>
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-coral/10 transition-colors btn-press"
+              title="Profile"
+            >
+              <span className="text-sm">Profile</span>
+            </button>
           </div>
         </div>
 
@@ -267,9 +267,31 @@ function StudentSessionPage() {
         {/* Floating Bottom Control Bar */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
 
-          {/* Chat Toggle */}
+          {/* Video Studio Toggle — moved first */}
           <button
-            onClick={() => setIsQAOpen(!isQAOpen)}
+            onClick={() => {
+              const next = !isVideoOpen;
+              setIsVideoOpen(next);
+              if (next) setIsQAOpen(false);
+            }}
+            className={clsx(
+              "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
+              isVideoOpen
+                ? "bg-deep-purple text-white"
+                : "bg-soft-purple text-ink hover:bg-soft-purple/80"
+            )}
+          >
+            <Clapperboard className="w-6 h-6" />
+            <span>{isVideoOpen ? "Close Video" : "Video Studio"}</span>
+          </button>
+
+          {/* Chat Toggle — moved second */}
+          <button
+            onClick={() => {
+              const next = !isQAOpen;
+              setIsQAOpen(next);
+              if (next) setIsVideoOpen(false);
+            }}
             className={clsx(
               "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold text-ink flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-slate-100",
               isQAOpen ? "bg-coral text-white active:bg-coral-dark" : "bg-white"
@@ -288,7 +310,7 @@ function StudentSessionPage() {
             onClick={handleImLostAction}
             className={clsx(
               "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
-              studentState?.isLost ? "bg-coral text-white hover:bg-coral-light" : "bg-mustard text-ink hover:bg-mustard-light"
+              studentState?.isLost ? "bg-red-400 text-white hover:bg-red-500" : "bg-mustard text-ink hover:bg-mustard-light"
             )}
           >
             <AlertCircle className="w-6 h-6" />
@@ -296,24 +318,373 @@ function StudentSessionPage() {
           </motion.button>
         </div>
 
-
-
       </div>
 
-      {/* Chat Sidebar */}
+      {/* Chat Overlay */}
       <AnimatePresence>
         {isQAOpen && studentId && (
-          <ChatSidebar
+          <ChatOverlay
             sessionId={sessionId as Id<"sessions">}
             studentId={studentId}
             questions={recentQuestions ?? []}
+            currentTranscriptLine={
+              paginatedTranscript.lines.length > 0
+                ? paginatedTranscript.lines[paginatedTranscript.lines.length - 1].text
+                : null
+            }
             onClose={() => setIsQAOpen(false)}
+            instructorName={session.instructorName}
+            instructorAvatar={session.instructorAvatar}
+
           />
         )}
+      </AnimatePresence>
 
+      {/* Video Studio Overlay */}
+      <AnimatePresence>
+        {isVideoOpen && studentId && (
+          <VideoStudioOverlay
+            sessionId={sessionId as Id<"sessions">}
+            studentId={studentId}
+            activeVideoUrl={activeVideoUrl}
+            setActiveVideoUrl={setActiveVideoUrl}
+            currentTranscriptLine={
+              paginatedTranscript.lines.length > 0
+                ? paginatedTranscript.lines[paginatedTranscript.lines.length - 1].text
+                : null
+            }
+            onClose={() => {
+              setIsVideoOpen(false);
+              setActiveVideoUrl(null);
+            }}
+          />
+        )}
       </AnimatePresence>
 
     </div>
+  );
+}
+
+function VideoStudioOverlay({
+  sessionId,
+  studentId,
+  activeVideoUrl,
+  setActiveVideoUrl,
+  currentTranscriptLine,
+  onClose,
+}: {
+  sessionId: Id<"sessions">;
+  studentId: string;
+  activeVideoUrl: string | null;
+  setActiveVideoUrl: (url: string | null) => void;
+  currentTranscriptLine: string | null;
+  onClose: () => void;
+}) {
+  const [prompt, setPrompt] = useState("");
+  const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
+  const [isSubmittingTranscript, setIsSubmittingTranscript] = useState(false);
+  const prevVideoRequestsRef = useRef<string | null>(null);
+
+  const videoRequests = useQuery(api.videos.listStudentVideoRequests, {
+    sessionId,
+    studentId,
+    limit: 10,
+  });
+  const createFromTranscript = useMutation(api.videos.createVideoFromTranscript);
+  const createFromPrompt = useMutation(api.videos.createVideoFromStudentPrompt);
+
+  // Auto-show the latest completed video when it transitions to "completed"
+  useEffect(() => {
+    if (!videoRequests || videoRequests.length === 0) return;
+    const latest = videoRequests[videoRequests.length - 1];
+    const latestKey = `${latest._id}-${latest.status}`;
+    if (
+      latest.status === "completed" &&
+      latest.videoUrl &&
+      prevVideoRequestsRef.current !== latestKey
+    ) {
+      setActiveVideoUrl(latest.videoUrl);
+    }
+    prevVideoRequestsRef.current = latestKey;
+  }, [videoRequests, setActiveVideoUrl]);
+
+  const handleTranscriptVideo = async () => {
+    if (isSubmittingTranscript) return;
+    setIsSubmittingTranscript(true);
+    setActiveVideoUrl(null);
+    try {
+      await createFromTranscript({ sessionId, studentId });
+    } catch (error) {
+      console.error("Failed to create transcript video request:", error);
+    } finally {
+      setIsSubmittingTranscript(false);
+    }
+  };
+
+  const handleCustomPromptVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim() || isSubmittingCustom) return;
+    setIsSubmittingCustom(true);
+    setActiveVideoUrl(null);
+    try {
+      await createFromPrompt({ sessionId, studentId, prompt: prompt.trim() });
+      setPrompt("");
+    } catch (error) {
+      console.error("Failed to create custom video request:", error);
+    } finally {
+      setIsSubmittingCustom(false);
+    }
+  };
+
+  const latestRequest = videoRequests && videoRequests.length > 0
+    ? videoRequests[videoRequests.length - 1]
+    : null;
+  const isGenerating =
+    latestRequest?.status === "queued" || latestRequest?.status === "processing";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-ink/20 backdrop-blur-[2px] z-40 flex flex-col"
+    >
+      {/* Main card area - centered above the ticker */}
+      <div className="flex-1 flex items-center justify-center px-4 py-2 overflow-hidden">
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          transition={{ type: "spring", bounce: 0.12, duration: 0.45 }}
+          className="bg-white border-2 border-ink rounded-[2rem] shadow-comic w-full max-w-3xl max-h-[calc(100vh-100px)] overflow-hidden flex flex-col"
+        >
+          {/* Header */}
+          <div className="px-5 py-4 border-b-2 border-ink bg-soft-purple/10 flex items-center justify-between shrink-0">
+            <h2 className="font-extrabold text-xl flex items-center gap-3">
+              <div className="w-9 h-9 bg-deep-purple rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
+                <Clapperboard className="w-4 h-4 text-white" />
+              </div>
+              Video Studio
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-black/5 rounded-full transition-colors group"
+            >
+              <div className="w-5 h-5 relative flex items-center justify-center">
+                <div className="absolute w-full h-0.5 bg-ink rotate-45 group-hover:bg-coral transition-colors" />
+                <div className="absolute w-full h-0.5 bg-ink -rotate-45 group-hover:bg-coral transition-colors" />
+              </div>
+            </button>
+          </div>
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-5 space-y-4">
+              {/* Inline Video Player / Generating State / Empty State */}
+              {activeVideoUrl ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <video
+                    src={activeVideoUrl}
+                    controls
+                    autoPlay
+                    className="w-full rounded-2xl border-2 border-ink shadow-comic bg-black"
+                    style={{ maxHeight: "350px" }}
+                  />
+                </motion.div>
+              ) : isGenerating ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-deep-purple/5 border-2 border-dashed border-deep-purple/30 rounded-2xl flex flex-col items-center justify-center py-12 gap-3"
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Clapperboard className="w-10 h-10 text-deep-purple" />
+                  </motion.div>
+                  <p className="font-extrabold text-lg text-ink">Generating your video...</p>
+                  <div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-deep-purple rounded-full"
+                        animate={{ scale: [1, 1.4, 1] }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          delay: i * 0.15,
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Show the optimized prompt while generating */}
+                  {latestRequest?.optimizedPrompt && (
+                    <p className="text-xs text-slate-500 text-center px-6 mt-2 italic max-w-md">
+                      &ldquo;{latestRequest.optimizedPrompt}&rdquo;
+                    </p>
+                  )}
+                </motion.div>
+              ) : (
+                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center py-12 gap-2">
+                  <Clapperboard className="w-10 h-10 text-slate-300" />
+                  <p className="font-bold text-slate-400 text-center text-sm">
+                    Generate a video from your lecture or type a custom prompt
+                  </p>
+                </div>
+              )}
+
+              {/* Error display */}
+              {latestRequest?.status === "failed" && latestRequest.error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border-2 border-red-200 rounded-xl p-3 flex items-start gap-2"
+                >
+                  <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                  <p className="text-sm font-bold text-red-700">{latestRequest.error}</p>
+                </motion.div>
+              )}
+
+              {/* Generation Controls */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleTranscriptVideo}
+                  disabled={isSubmittingTranscript || isGenerating}
+                  className="w-full bg-soft-purple border-2 border-ink rounded-xl px-5 py-3.5 font-extrabold text-white shadow-comic-sm btn-press flex items-center justify-center gap-3 disabled:opacity-50 text-base"
+                >
+                  {isSubmittingTranscript || (isGenerating && latestRequest?.triggerType === "transcript") ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Wand2 className="w-5 h-5" />
+                  )}
+                  <span>Generate from Current Lecture</span>
+                </button>
+
+                <div className="flex items-center gap-3 opacity-40">
+                  <div className="flex-1 h-0.5 bg-ink/20" />
+                  <span className="text-xs font-extrabold uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-0.5 bg-ink/20" />
+                </div>
+
+                <form onSubmit={handleCustomPromptVideo} className="flex gap-2">
+                  <input
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder='e.g. "Explain gravity with a visual simulation"'
+                    className="flex-1 px-4 py-3.5 bg-white border-2 border-ink rounded-xl outline-none font-bold text-sm placeholder:text-slate-400 focus:shadow-comic-sm transition-all"
+                    disabled={isGenerating}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!prompt.trim() || isSubmittingCustom || isGenerating}
+                    className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-extrabold disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubmittingCustom ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                    <span className="hidden sm:inline">Generate</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Past Videos */}
+              {videoRequests && videoRequests.length > 0 && (
+                <div className="pt-2">
+                  <h4 className="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-3">
+                    Previous Generations
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[...videoRequests].reverse().map((request) => {
+                      const isActive = activeVideoUrl === request.videoUrl;
+                      const statusStyle =
+                        request.status === "completed"
+                          ? "bg-green-100 text-green-700"
+                          : request.status === "failed"
+                            ? "bg-red-100 text-red-700"
+                            : request.status === "processing"
+                              ? "bg-mustard/40 text-ink"
+                              : "bg-slate-100 text-slate-600";
+
+                      return (
+                        <button
+                          key={request._id}
+                          onClick={() => {
+                            if (request.status === "completed" && request.videoUrl) {
+                              setActiveVideoUrl(request.videoUrl);
+                            }
+                          }}
+                          disabled={request.status !== "completed"}
+                          className={clsx(
+                            "text-left bg-white border-2 rounded-xl p-3 transition-all",
+                            request.status === "completed"
+                              ? "border-ink hover:shadow-comic-sm cursor-pointer"
+                              : "border-slate-200 opacity-60 cursor-default",
+                            isActive && "ring-2 ring-deep-purple ring-offset-2"
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">
+                              {request.triggerType === "transcript" ? "Lecture" : "Prompt"}
+                            </span>
+                            <span className={clsx("text-[10px] px-1.5 py-0.5 rounded-full font-extrabold", statusStyle)}>
+                              {request.status}
+                            </span>
+                          </div>
+                          <p className="text-xs font-bold text-ink line-clamp-2">
+                            {request.studentPrompt ?? request.sourcePrompt}
+                          </p>
+                          {request.optimizedPrompt && (
+                            <p className="text-[10px] mt-1 text-slate-400 line-clamp-1 italic">
+                              {request.optimizedPrompt}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Live Transcript Ticker - pinned to bottom */}
+      <div className="shrink-0 px-4 pb-5 pt-1">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-3xl mx-auto"
+        >
+          {currentTranscriptLine ? (
+            <div className="bg-white/90 backdrop-blur-md border-2 border-ink rounded-2xl px-5 py-3 shadow-comic-sm flex items-center gap-3">
+              <div className="shrink-0 flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Live</span>
+              </div>
+              <p className="font-bold text-ink text-base truncate">
+                {currentTranscriptLine}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white/60 backdrop-blur-md border-2 border-dashed border-slate-300 rounded-2xl px-5 py-3 flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-slate-300" />
+              <p className="font-bold text-slate-400 text-sm">
+                Waiting for teacher to speak...
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -323,7 +694,7 @@ function TranscriptView({
   isLoadingMore,
   onLoadMore,
 }: {
-  transcript: { _id: string; text: string; createdAt: number }[];
+  transcript: { _id: string; text: string; createdAt: number; source?: string }[];
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -420,15 +791,15 @@ function TranscriptView({
         ) : (
           <>
             <div className="flex items-center gap-2 mb-4 opacity-50 px-2 sticky top-0 z-10 bg-lavender-bg/80 backdrop-blur-sm py-2 -mx-2 rounded-lg">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-black text-xs tracking-widest uppercase text-slate-500">Live Transcript</span>
+              <div className="w-2 h-2 rounded-full bg-soft-purple animate-pulse" />
+              <span className="font-extrabold text-xs tracking-widest uppercase text-slate-500">Live Transcript</span>
               {transcript.length > 50 && (
                 <span className="text-xs text-slate-400 ml-auto">{transcript.length} lines</span>
               )}
             </div>
             <div className="flex flex-col gap-6 px-4">
               {transcript.map((line, index) => {
-                const isRecent = index === transcript.length - 1; // Only the most recent line is "active"
+                const isRecent = index === transcript.length - 1;
                 return (
                   <motion.div
                     key={line._id}
@@ -461,11 +832,17 @@ function TranscriptView({
   );
 }
 
-function ChatSidebar({
+import { AvatarPreview } from "../components/AvatarPreview";
+
+
+function ChatOverlay({
   sessionId,
   studentId,
   questions,
+  currentTranscriptLine,
   onClose,
+  instructorName,
+  instructorAvatar
 }: {
   sessionId: Id<"sessions">;
   studentId: string;
@@ -473,14 +850,22 @@ function ChatSidebar({
     _id: string;
     question: string;
     answer?: string;
+    isApproved?: boolean;
+    translatedQuestion?: string;
+    translatedAnswer?: string;
+    originalLanguage?: string;
     createdAt: number;
   }[];
+  currentTranscriptLine: string | null;
   onClose: () => void;
+  instructorName?: string;
+  instructorAvatar?: any;
 }) {
   const [input, setInput] = useState("");
   const [isAsking, setIsAsking] = useState(false);
   const askQuestion = useMutation(api.questions.askQuestion);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -488,6 +873,11 @@ function ChatSidebar({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [questions]);
+
+  // Auto-focus input on mount
+  useEffect(() => {
+    setTimeout(() => inputRef.current?.focus(), 300);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -509,89 +899,179 @@ function ChatSidebar({
 
   return (
     <motion.div
-      initial={{ width: 0, opacity: 0 }}
-      animate={{ width: "auto", opacity: 1 }}
-      exit={{ width: 0, opacity: 0 }}
-      transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-      className="w-full sm:w-96 bg-white border-l-2 border-ink h-full shadow-comic-lg z-30 flex flex-col shrink-0 overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-ink/20 backdrop-blur-[2px] z-40 flex flex-col"
     >
-      <div className="w-[100vw] sm:w-96 h-full flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b-2 border-ink bg-soft-purple/10 flex items-center justify-between">
-          <h3 className="font-black text-xl flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-soft-purple fill-current" />
-            AI Assistant
-          </h3>
-          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-colors group">
-            <div className="w-5 h-5 relative flex items-center justify-center">
-              <div className="absolute w-full h-0.5 bg-ink rotate-45 group-hover:bg-coral transition-colors" />
-              <div className="absolute w-full h-0.5 bg-ink -rotate-45 group-hover:bg-coral transition-colors" />
-            </div>
-          </button>
-        </div>
-
-        {/* Chat History */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-dots" ref={scrollRef}>
-          {questions.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-2">
-              <MessageCircle className="w-12 h-12 opacity-20" />
-              <p className="font-bold text-sm">Ask anything about the lecture!</p>
-            </div>
-          ) : (
-            questions.map((q) => (
-              <div key={q._id} className="space-y-2">
-                {/* Student Question */}
-                <div className="flex justify-end">
-                  <div className="bg-coral text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm font-bold border-2 border-ink shadow-comic-sm max-w-[85%]">
-                    {q.question}
+      {/* Main card area - centered above the ticker */}
+      <div className="flex-1 flex items-center justify-center px-4 py-2 overflow-hidden">
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          transition={{ type: "spring", bounce: 0.12, duration: 0.45 }}
+          className="bg-white border-2 border-ink rounded-[2rem] shadow-comic w-full max-w-2xl max-h-[calc(100vh-100px)] overflow-hidden flex flex-col"
+        >
+          {/* Header */}
+          <div className="px-5 py-4 border-b-2 border-ink bg-mustard/10 flex items-center justify-between shrink-0">
+            <h2 className="font-extrabold text-xl flex items-center gap-3">
+              <div className="w-9 h-9 bg-mustard rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
+                {instructorAvatar ? (
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-ink bg-white">
+                    <AvatarPreview avatar={instructorAvatar} size="sm" />
                   </div>
-                </div>
+                ) : (
+                  <Sparkles className="w-4 h-4 text-white fill-current" />
+                )}
+              </div>
+              {instructorName || "AI Assistant"}
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-black/5 rounded-full transition-colors group"
+            >
+              <div className="w-5 h-5 relative flex items-center justify-center">
+                <div className="absolute w-full h-0.5 bg-ink rotate-45 group-hover:bg-coral transition-colors" />
+                <div className="absolute w-full h-0.5 bg-ink -rotate-45 group-hover:bg-coral transition-colors" />
+              </div>
+            </button>
+          </div>
 
-                {/* AI Answer */}
-                <div className="flex justify-start">
-                  {q.answer ? (
-                    <div className="bg-white border-2 border-ink text-ink px-4 py-3 rounded-2xl rounded-tl-sm text-sm font-medium shadow-comic-sm max-w-[90%]">
-                      <Sparkles className="w-3 h-3 text-soft-purple mb-1 fill-current" />
-                      {q.answer}
+          {/* Chat History */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-4" ref={scrollRef}>
+            {questions.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-3 py-12">
+                <MessageCircle className="w-12 h-12 opacity-20" />
+                <p className="font-bold text-sm text-center">
+                  Ask anything about the lecture!<br />
+                  <span className="text-xs text-slate-300 font-medium">AI will answer based on what the teacher is saying.</span>
+                </p>
+              </div>
+            ) : (
+              questions.map((q) => (
+                <div key={q._id} className="space-y-2">
+                  {/* Question Bubble */}
+                  <div className="flex justify-end">
+                    <div className="bg-ink text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%] shadow-sm">
+                      <p className="font-bold text-sm">{q.question}</p>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
+                  </div>
+
+                  {/* Answer Bubble */}
+                  {q.answer && (
+                    <div className="flex justify-start">
+                      <div className={clsx(
+                        "border-2 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]",
+                        q.isApproved ? "bg-slate-100 border-slate-200" : "bg-yellow-50 border-yellow-300"
+                      )}>
+                        {q.translatedAnswer ? (
+                          <div className="space-y-1">
+                            <p className="font-medium text-sm text-slate-700">{q.translatedAnswer}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                              <Globe className="w-3 h-3" />
+                              Translated Answer
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="font-medium text-sm text-slate-700">{q.answer}</p>
+                        )}
+
+                        {/* Teacher Follow-up */}
+                        {(q.teacherFollowUp || q.translatedTeacherFollowUp) && (
+                          <div className="mt-3 pt-3 border-t border-slate-200/50">
+                            <div className="flex items-start gap-2">
+                              <div className="bg-blue-100/50 p-1.5 rounded-lg shrink-0">
+                                <MessageSquare className="w-3 h-3 text-blue-500" />
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider">Teacher Note</p>
+                                <p className="text-sm text-slate-700">
+                                  {q.translatedTeacherFollowUp || q.teacherFollowUp}
+                                </p>
+                                {q.translatedTeacherFollowUp && (
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <Globe className="w-3 h-3" />
+                                    Translated
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {!q.isApproved && !q.teacherFollowUp && (
+                          <p className="text-[10px] text-yellow-600 font-bold mt-2 flex items-center gap-1 uppercase tracking-wider">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Verifying...
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              ))
+            )}
 
-        {/* Input Area */}
-        <div className="p-4 border-t-2 border-ink bg-white">
-          <form onSubmit={handleSubmit} className="relative">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your question..."
-              className="w-full pl-4 pr-12 py-3 bg-slate-50 border-2 border-ink rounded-xl outline-none font-bold text-ink placeholder-ink/30 focus:bg-white transition-all focus:shadow-comic-sm"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isAsking}
-              className="absolute right-2 top-2 bottom-2 aspect-square bg-ink text-white rounded-lg flex items-center justify-center disabled:opacity-20 transition-all hover:bg-coral active:scale-95"
-            >
-              {isAsking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </button>
-          </form>
-        </div>
-      </div>
-    </motion.div>
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 border-t-2 border-ink bg-white shrink-0">
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about the lecture..."
+                className="flex-1 px-4 py-3.5 bg-slate-50 border-2 border-ink rounded-xl outline-none font-bold text-ink placeholder-ink/30 focus:bg-white transition-all focus:shadow-comic-sm"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isAsking}
+                className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-extrabold disabled:opacity-30 flex items-center gap-2"
+              >
+                {isAsking ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                <span className="hidden sm:inline">Send</span>
+              </button>
+            </form>
+          </div>
+        </motion.div >
+      </div >
+
+      {/* Live Transcript Ticker - pinned to bottom */}
+      < div className="shrink-0 px-4 pb-5 pt-1" >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-2xl mx-auto"
+        >
+          {currentTranscriptLine ? (
+            <div className="bg-white/90 backdrop-blur-md border-2 border-ink rounded-2xl px-5 py-3 shadow-comic-sm flex items-center gap-3">
+              <div className="shrink-0 flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Live</span>
+              </div>
+              <p className="font-bold text-ink text-base truncate">
+                {currentTranscriptLine}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white/60 backdrop-blur-md border-2 border-dashed border-slate-300 rounded-2xl px-5 py-3 flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-slate-300" />
+              <p className="font-bold text-slate-400 text-sm">
+                Waiting for teacher to speak...
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </div >
+    </motion.div >
   );
 }
 
 function getSubmittedQuizKey(quizId: string) { return `quiz-submitted-${quizId}`; }
-
-
 
 function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
   const [answers, setAnswers] = useState<number[]>(new Array(quiz.questions.length).fill(-1));
@@ -634,7 +1114,7 @@ function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
           <div className="w-20 h-20 bg-green-100 border-2 border-ink rounded-full flex items-center justify-center mx-auto mb-6">
             <ThumbsUp className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-3xl font-black text-ink mb-2">You're Awesome!</h2>
+          <h2 className="text-3xl font-extrabold text-ink mb-2">You're Awesome!</h2>
           <p className="text-slate-500 font-bold">Responses sent.</p>
         </motion.div>
       </motion.div>
@@ -645,8 +1125,8 @@ function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-ink/20 backdrop-blur-md z-[100] flex items-center justify-center p-4">
       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} className="bg-white border-2 border-ink rounded-[2rem] p-6 max-w-xl w-full shadow-comic my-8 max-h-[85vh] overflow-y-auto custom-scrollbar">
         <div className="text-center mb-8">
-          <span className="inline-block px-4 py-1 bg-mustard border-2 border-ink font-black rounded-lg text-xs uppercase tracking-wider mb-3 shadow-comic-sm">Pop Quiz</span>
-          <h2 className="text-3xl font-black text-ink">Quick Check!</h2>
+          <span className="inline-block px-4 py-1 bg-mustard border-2 border-ink font-extrabold rounded-lg text-xs uppercase tracking-wider mb-3 shadow-comic-sm">Pop Quiz</span>
+          <h2 className="text-3xl font-extrabold text-ink">Quick Check!</h2>
         </div>
 
         <div className="space-y-8">
@@ -675,7 +1155,7 @@ function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting || answers.some(a => a === -1)}
-          className="w-full mt-8 py-4 bg-ink hover:bg-slate-800 text-white font-black text-lg rounded-2xl shadow-comic transition-all disabled:opacity-50 disabled:shadow-comic-sm btn-press"
+          className="w-full mt-8 py-4 bg-coral hover:bg-coral-dark text-white font-extrabold text-lg rounded-2xl shadow-comic transition-all disabled:opacity-50 disabled:shadow-comic-sm btn-press"
         >
           {isSubmitting ? "Sending..." : "Submit Answers"}
         </button>

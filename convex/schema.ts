@@ -10,6 +10,19 @@ const questionSchema = v.object({
   conceptTag: v.string(),
 });
 
+// Avatar shape — DiceBear (style + seed) with legacy SVG fields kept optional for
+// backwards-compatibility with existing documents created before the migration.
+const avatarSchema = v.optional(v.object({
+  style: v.optional(v.string()),
+  seed: v.optional(v.string()),
+  // Legacy SVG avatar fields (old documents may still have these)
+  hairStyle: v.optional(v.string()),
+  hairColor: v.optional(v.string()),
+  eyes: v.optional(v.string()),
+  skinTone: v.optional(v.string()),
+  accessory: v.optional(v.string()),
+}));
+
 export default defineSchema({
   // Lecture sessions with join codes
   sessions: defineTable({
@@ -19,7 +32,8 @@ export default defineSchema({
     createdAt: v.number(),
     contextText: v.optional(v.string()), // Uploaded slides/context for AI
     activeQuizId: v.optional(v.id("quizzes")), // Currently active quiz
-
+    instructorName: v.optional(v.string()), // Teacher's name
+    instructorAvatar: avatarSchema, // Teacher's DiceBear avatar
   }).index("by_code", ["code"]),
 
   // Transcript segments - append-only for real-time performance
@@ -27,6 +41,8 @@ export default defineSchema({
     sessionId: v.id("sessions"),
     text: v.string(),
     createdAt: v.number(),
+    // Optional tag to indicate where this transcript line came from (mic, zoom VTT, captions scrape, etc.)
+    source: v.optional(v.string()),
   }).index("by_session", ["sessionId", "createdAt"]),
 
   // Quiz definitions with MCQ questions
@@ -68,13 +84,10 @@ export default defineSchema({
     totalCorrect: v.optional(v.number()),
     totalAnswered: v.optional(v.number()),
     score: v.optional(v.number()),
-    // Student profile (avatar, accessibility, preferences)
+    // Student profile (DiceBear avatar, accessibility, preferences)
     profileComplete: v.optional(v.boolean()),
     displayName: v.optional(v.string()),
-    avatar: v.optional(v.object({
-      style: v.optional(v.string()),
-      seed: v.optional(v.string()),
-    })),
+    avatar: avatarSchema,
     accessibility: v.optional(v.array(v.string())),
     languagePreference: v.optional(v.string()),
     learningPreference: v.optional(v.array(v.string())),
@@ -90,6 +103,36 @@ export default defineSchema({
     studentId: v.string(),
     question: v.string(),
     answer: v.optional(v.string()), // AI-generated answer
+    isApproved: v.optional(v.boolean()), // Teacher approval status
+    translatedQuestion: v.optional(v.string()), // English translation if original wasn't English
+    translatedAnswer: v.optional(v.string()), // Translation of the answer back to student's language
+    originalLanguage: v.optional(v.string()), // Original language if translated
+    teacherFollowUp: v.optional(v.string()), // Teacher's follow-up note
+    translatedTeacherFollowUp: v.optional(v.string()), // Translation of follow-up
     createdAt: v.number(),
   }).index("by_session", ["sessionId", "createdAt"]),
+
+  // Student video generation requests (lecture context + custom prompts)
+  videoRequests: defineTable({
+    sessionId: v.id("sessions"),
+    studentId: v.string(),
+    triggerType: v.union(v.literal("transcript"), v.literal("custom_prompt")),
+    studentPrompt: v.optional(v.string()),
+    sourcePrompt: v.string(), // Raw prompt before Claude optimization
+    optimizedPrompt: v.optional(v.string()), // Claude-converted Veo prompt
+    status: v.union(
+      v.literal("queued"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+    provider: v.optional(v.string()),
+    videoUrl: v.optional(v.string()),
+    providerRequestId: v.optional(v.string()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_session_student", ["sessionId", "studentId", "createdAt"])
+    .index("by_status", ["status", "createdAt"]),
 });

@@ -1,0 +1,10 @@
+mcp
+langchain
+langgraph
+convex
+chromadb
+google-generativeai
+python-dotenv
+pydantic==2.10.6
+pydantic-settings
+anthropic

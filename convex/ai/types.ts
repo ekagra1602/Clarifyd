@@ -8,7 +8,9 @@ export type AIFeatureType =
   | "qa_answer"
   | "quiz_generation"
   | "question_summary"
-  | "lost_summary";
+  | "lost_summary"
+  | "translate_question"
+  | "translate_response";
 
 // ==========================================
 // Context Types
@@ -92,6 +94,11 @@ export interface LostSummaryResult {
 // Unified Response Type
 // ==========================================
 
+export interface TranslateResult {
+  translatedText: string;
+  originalLanguage: string;
+}
+
 export interface AIResponse {
   success: boolean;
   featureType: AIFeatureType;
@@ -99,6 +106,7 @@ export interface AIResponse {
   quizResult?: QuizGenerationResult;
   questionSummaryResult?: QuestionSummaryResult;
   lostSummaryResult?: LostSummaryResult;
+  translateResult?: TranslateResult;
   error?: {
     code: "API_KEY_MISSING" | "API_ERROR" | "PARSE_ERROR" | "CONTEXT_ERROR" | "RATE_LIMITED";
     message: string;

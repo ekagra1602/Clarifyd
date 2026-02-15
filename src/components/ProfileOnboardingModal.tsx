@@ -215,7 +215,7 @@ export function ProfileOnboardingModal({
         className="bg-white border-2 border-ink rounded-2xl shadow-comic max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col"
       >
         <div className="p-4 border-b-2 border-ink bg-mustard/20 flex items-center justify-between shrink-0">
-          <h2 className="text-xl font-black text-ink">
+          <h2 className="text-xl font-extrabold text-ink">
             {isEdit ? "Edit Profile" : "Create Your Profile"}
           </h2>
           <button
@@ -231,7 +231,7 @@ export function ProfileOnboardingModal({
         </div>
 
         <div className="overflow-y-auto p-4 space-y-6 custom-scrollbar">
-          {/* Avatar (DiceBear - toggle style with arrows, no labels) */}
+          {/* Avatar (DiceBear - toggle style with arrows) */}
           <div>
             <div className="bg-slate-50 border-2 border-ink/20 rounded-xl p-4">
               <AvatarPreview avatar={form.avatar} />
@@ -366,7 +366,7 @@ export function ProfileOnboardingModal({
             type="button"
             onClick={handleSave}
             disabled={saving || form.learningPreference.length === 0}
-            className="w-full py-3 bg-ink hover:bg-slate-800 disabled:opacity-50 text-white font-black rounded-xl border-2 border-ink shadow-comic btn-press flex items-center justify-center gap-2"
+            className="w-full py-3 bg-coral hover:bg-coral-dark disabled:opacity-50 text-white font-extrabold rounded-xl border-2 border-ink shadow-comic btn-press flex items-center justify-center gap-2"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
             Save

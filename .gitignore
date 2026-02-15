@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 dist
 .vercel
+package-lock.json
 
 # Convex generated files
 convex/_generated
@@ -28,3 +29,8 @@ todos.json
 # Playwright
 playwright-report/
 test-results/
+
+#Python
+__pycache__
+.venv/
+agent/venv

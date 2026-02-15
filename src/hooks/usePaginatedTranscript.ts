@@ -8,6 +8,7 @@ type TranscriptLine = {
   text: string;
   createdAt: number;
   sessionId: Id<"sessions">;
+  source?: string;
 };
 
 type PaginatedTranscriptResult = {
@@ -66,10 +67,10 @@ export function usePaginatedTranscript(
     api.transcripts.listTranscriptPaginated,
     oldestLoadedTimestamp !== undefined && isLoadingMore
       ? {
-          sessionId,
-          limit: LOAD_MORE_LIMIT,
-          beforeTimestamp: oldestLoadedTimestamp,
-        }
+        sessionId,
+        limit: LOAD_MORE_LIMIT,
+        beforeTimestamp: oldestLoadedTimestamp,
+      }
       : "skip"
   );
 

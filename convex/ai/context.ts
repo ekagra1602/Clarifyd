@@ -16,7 +16,9 @@ export const buildContextForFeature = internalQuery({
       v.literal("qa_answer"),
       v.literal("quiz_generation"),
       v.literal("question_summary"),
-      v.literal("lost_summary")
+      v.literal("lost_summary"),
+      v.literal("translate_question"),
+      v.literal("translate_response")
     ),
     sessionId: v.id("sessions"),
     recentMinutes: v.optional(v.number()),
@@ -183,6 +185,26 @@ function getContextOptionsForFeature(
         includeTranscript: true,
         transcriptLimit: 30,
         transcriptMinutesWindow: recentMinutes ?? 3,
+        includeQuestions: false,
+        questionLimit: 0,
+      };
+
+    case "translate_question":
+      // Translation: No context needed, just the question text
+      return {
+        includeSlides: false,
+        includeTranscript: false,
+        transcriptLimit: 0,
+        includeQuestions: false,
+        questionLimit: 0,
+      };
+
+    case "translate_response":
+      // Translation: No context needed, just the QA text
+      return {
+        includeSlides: false,
+        includeTranscript: false,
+        transcriptLimit: 0,
         includeQuestions: false,
         questionLimit: 0,
       };

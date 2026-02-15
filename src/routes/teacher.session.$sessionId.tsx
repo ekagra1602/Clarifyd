@@ -28,11 +28,13 @@ import {
 } from "lucide-react";
 import { TranscriptionControls } from "../components/TranscriptionControls";
 import { LeaderboardModal } from "../components/LeaderboardModal";
+import { StudentQuestionFeed } from "../components/StudentQuestionFeed";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
 export const Route = createFileRoute("/teacher/session/$sessionId")({
   component: TeacherSessionPage,
+  ssr: false,
 });
 
 function TeacherSessionPage() {
@@ -106,7 +108,7 @@ function TeacherSessionPage() {
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-ink border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-coral border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -118,7 +120,7 @@ function TeacherSessionPage() {
           <div className="w-20 h-20 bg-soft-purple rounded-full border-2 border-ink flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-black mb-4">Class Dismissed!</h1>
+          <h1 className="text-4xl font-extrabold mb-4">Class Dismissed!</h1>
           <p className="text-lg font-medium text-slate-500 mb-8">Great session today.</p>
 
           <button
@@ -190,20 +192,19 @@ function TeacherSessionPage() {
         {/* Helper Header */}
         <div className="flex justify-start pb-2">
           <button onClick={handleEndSession} className="flex items-center gap-2">
-            <div className="bg-ink text-white px-3 py-1 rounded-lg border-2 border-transparent hover:border-coral hover:text-coral hover:bg-white transition-all transform -rotate-2">
-              <span className="text-xl font-black tracking-tight">Wait</span>
+            <div className="bg-coral text-white px-4 py-1 rounded-lg border-2 border-transparent hover:border-ink hover:bg-white hover:text-coral transition-all transform -rotate-1">
+              <span className="text-xl font-extrabold tracking-tight">Clarifyd</span>
             </div>
-            <span className="text-xl font-black text-ink tracking-tight transform rotate-1">What</span>
           </button>
         </div>
 
         {/* Top Navbar Card */}
         <div className="bg-milk border-2 border-ink rounded-2xl p-4 md:p-6 shadow-comic flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="bg-coral text-white px-4 py-1 rounded-full border-2 border-ink font-bold transform -rotate-1 shadow-comic-sm">
+            <div className="bg-soft-purple text-white px-4 py-1 rounded-full border-2 border-ink font-bold transform -rotate-1 shadow-comic-sm">
               LIVE
             </div>
-            <h1 className="text-2xl font-black">{session.roomName || "Classroom"}</h1>
+            <h1 className="text-2xl font-extrabold">{session.roomName || "Classroom"}</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -247,78 +248,21 @@ function TeacherSessionPage() {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* GRID: Swapped — Actions left (col-8), Confusion right (col-4) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
-          {/* Left: Confusion Meter */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            <div className="bg-milk border-2 border-ink rounded-[2rem] p-6 shadow-comic flex flex-col items-center text-center relative overflow-hidden h-full">
-              <div className="absolute top-0 inset-x-0 h-4 bg-soft-purple border-b-2 border-ink" />
-
-              <h2 className="text-xl font-black mt-2 mb-1">Room Vibe</h2>
-              <p className="text-slate-500 font-bold text-sm uppercase tracking-wide opacity-70">Confusion Level</p>
-
-              <div className="flex-1 flex flex-col items-center justify-center relative w-full py-2">
-                {/* Background Circles */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="w-48 h-48 bg-mustard rounded-full blur-3xl"
-                  />
-                </div>
-
-                <motion.div
-                  animate={{
-                    scale: 1 + (lostStudentCount || 0) * 0.1,
-                    rotate: (lostStudentCount || 0) * 5
-                  }}
-                  className={clsx(
-                    "w-32 h-32 border-4 border-ink rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 shadow-comic",
-                    (lostStudentCount || 0) > 3 ? "bg-coral" : (lostStudentCount || 0) > 0 ? "bg-mustard" : "bg-white"
-                  )}
-                >
-                  {/* Face Expression */}
-                  {(lostStudentCount || 0) > 3 ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex gap-4"><div className="w-3 h-3 rounded-full bg-ink" /><div className="w-3 h-3 rounded-full bg-ink" /></div>
-                      <div className="w-8 h-3 bg-ink rounded-full" />
-                    </div>
-                  ) : (lostStudentCount || 0) > 0 ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-ink" /><div className="w-3 h-3 rounded-full bg-ink" /></div>
-                      <div className="w-6 h-1 bg-ink" />
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex gap-4"><div className="w-3 h-6 bg-ink rounded-full" /><div className="w-3 h-6 bg-ink rounded-full" /></div>
-                      <div className="w-8 h-4 border-b-4 border-ink rounded-b-full" />
-                    </div>
-                  )}
-                </motion.div>
-
-                <div className="mt-4 flex gap-2 items-end">
-                  <span className="text-4xl font-black tabular-nums leading-none">
-                    {lostStudentCount ?? 0}
-                  </span>
-                  <span className="font-bold text-slate-500 mb-1">confused</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right: Actions */}
+          {/* Left: Actions (was right) */}
           <div className="lg:col-span-8 flex flex-col gap-4">
 
             {/* Quiz Control Card */}
-            <div className="bg-mustard border-2 border-ink rounded-[2rem] p-8 shadow-comic relative overflow-hidden">
-              <div className="absolute -right-10 -bottom-10 opacity-20 transform rotate-12">
+            <div className="bg-coral/10 border-2 border-ink rounded-[2rem] p-8 shadow-comic relative overflow-hidden">
+              <div className="absolute -right-10 -bottom-10 opacity-10 transform rotate-12">
                 <HelpCircle className="w-64 h-64" />
               </div>
 
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-3xl font-black">Pop Quiz</h2>
+                  <h2 className="text-3xl font-extrabold">Pop Quiz</h2>
                   <div className="bg-white px-3 py-1 rounded-lg border-2 border-ink font-bold text-sm shadow-comic-sm">
                     {activeQuiz ? "ACTIVE NOW" : "READY"}
                   </div>
@@ -345,7 +289,7 @@ function TeacherSessionPage() {
                     <button
                       onClick={handleLaunchQuiz}
                       disabled={isLaunchingQuiz}
-                      className="bg-white text-ink w-full md:w-auto px-8 py-4 rounded-xl border-2 border-ink font-black text-xl shadow-comic flex items-center gap-3 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 btn-press"
+                      className="bg-white text-ink w-full md:w-auto px-8 py-4 rounded-xl border-2 border-ink font-extrabold text-xl shadow-comic flex items-center gap-3 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 btn-press"
                     >
                       {isLaunchingQuiz ? <Loader2 className="animate-spin" /> : <Play className="fill-current" />}
                       Launch Quiz
@@ -356,12 +300,12 @@ function TeacherSessionPage() {
             </div>
 
             {/* Live Transcription Card */}
-            <div className="bg-soft-purple/20 border-2 border-ink rounded-[2rem] p-6 shadow-comic">
+            <div className="bg-soft-purple/15 border-2 border-ink rounded-[2rem] p-6 shadow-comic">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-soft-purple border-2 border-ink rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-coral border-2 border-ink rounded-xl flex items-center justify-center">
                   <Mic className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-xl font-black">Live Transcription</h2>
+                <h2 className="text-xl font-extrabold">Live Transcription</h2>
               </div>
               <TranscriptionControls sessionId={sessionId as Id<"sessions">} />
             </div>
@@ -372,7 +316,7 @@ function TeacherSessionPage() {
                 onClick={() => setShowQuestionSummary(true)}
                 className="bg-white border-2 border-ink rounded-2xl p-4 shadow-comic hover:shadow-none hover:translate-y-1 hover:translate-x-1 transition-all cursor-pointer group flex items-center gap-4 w-full text-left"
               >
-                <div className="w-12 h-12 bg-soft-purple border-2 border-ink rounded-xl flex items-center justify-center group-hover:-rotate-6 transition-transform shrink-0">
+                <div className="w-12 h-12 bg-mustard border-2 border-ink rounded-xl flex items-center justify-center group-hover:-rotate-6 transition-transform shrink-0">
                   <MessageSquare className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -392,6 +336,65 @@ function TeacherSessionPage() {
                   <p className="text-red-400/80 text-sm font-medium">Close session</p>
                 </div>
               </button>
+            </div>
+
+            <StudentQuestionFeed sessionId={sessionId as Id<"sessions">} />
+          </div>
+
+          {/* Right: Confusion Meter (was left) */}
+          <div className="lg:col-span-4 flex flex-col gap-4 self-start lg:sticky lg:top-6">
+            <div className="bg-milk border-2 border-ink rounded-[2rem] p-6 shadow-comic flex flex-col items-center text-center relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-4 bg-mustard border-b-2 border-ink" />
+
+              <h2 className="text-xl font-extrabold mt-2 mb-1">Room Vibe</h2>
+              <p className="text-slate-500 font-bold text-sm uppercase tracking-wide opacity-70">Confusion Level</p>
+
+              <div className="flex flex-col items-center justify-center relative w-full py-6">
+                {/* Background Circles */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-48 h-48 bg-coral rounded-full blur-3xl"
+                  />
+                </div>
+
+                <motion.div
+                  animate={{
+                    scale: 1 + (lostStudentCount || 0) * 0.1,
+                    rotate: (lostStudentCount || 0) * 5
+                  }}
+                  className={clsx(
+                    "w-32 h-32 border-4 border-ink rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 shadow-comic",
+                    (lostStudentCount || 0) > 3 ? "bg-red-400" : (lostStudentCount || 0) > 0 ? "bg-mustard" : "bg-white"
+                  )}
+                >
+                  {/* Face Expression */}
+                  {(lostStudentCount || 0) > 3 ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-4"><div className="w-3 h-3 rounded-full bg-ink" /><div className="w-3 h-3 rounded-full bg-ink" /></div>
+                      <div className="w-8 h-3 bg-ink rounded-full" />
+                    </div>
+                  ) : (lostStudentCount || 0) > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-ink" /><div className="w-3 h-3 rounded-full bg-ink" /></div>
+                      <div className="w-6 h-1 bg-ink" />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-4"><div className="w-3 h-6 bg-ink rounded-full" /><div className="w-3 h-6 bg-ink rounded-full" /></div>
+                      <div className="w-8 h-4 border-b-4 border-ink rounded-b-full" />
+                    </div>
+                  )}
+                </motion.div>
+
+                <div className="mt-4 flex gap-2 items-end">
+                  <span className="text-4xl font-extrabold tabular-nums leading-none">
+                    {lostStudentCount ?? 0}
+                  </span>
+                  <span className="font-bold text-slate-500 mb-1">confused</span>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -421,7 +424,7 @@ function TeacherSessionPage() {
                 <X className="w-6 h-6" />
               </button>
 
-              <h3 className="text-2xl font-black mb-2">Join Class</h3>
+              <h3 className="text-2xl font-extrabold mb-2">Join Class</h3>
               <p className="text-slate-500 font-bold mb-6">Scan to join immediately</p>
 
               <div className="bg-white p-4 rounded-xl border-2 border-ink inline-block mb-6 shadow-sm">
@@ -469,19 +472,19 @@ function TeacherSessionPage() {
               onClick={(e) => e.stopPropagation()}
               className="bg-white border-4 border-ink p-8 rounded-[2.5rem] shadow-comic max-w-md w-full text-center relative overflow-hidden"
             >
-              <div className="absolute top-0 inset-x-0 h-4 bg-coral border-b-4 border-ink" />
+              <div className="absolute top-0 inset-x-0 h-4 bg-red-400 border-b-4 border-ink" />
 
               <div className="w-20 h-20 bg-red-100 rounded-full border-4 border-ink flex items-center justify-center mx-auto mb-6 relative">
                 <StopCircle className="w-10 h-10 text-red-500" />
-                <div className="absolute -right-2 -top-2 bg-ink text-white text-xs font-black px-2 py-1 rounded-lg transform rotate-12">
-                  WAIT!
+                <div className="absolute -right-2 -top-2 bg-ink text-white text-xs font-extrabold px-2 py-1 rounded-lg transform rotate-12">
+                  HOLD ON!
                 </div>
               </div>
 
-              <h3 className="text-3xl font-black mb-4 text-ink">Wrap it up?</h3>
+              <h3 className="text-3xl font-extrabold mb-4 text-ink">Wrap it up?</h3>
               <p className="text-slate-500 font-bold mb-8 text-lg leading-relaxed">
                 Are you sure you want to end this session? <br />
-                <span className="text-coral">All students will be disconnected.</span>
+                <span className="text-red-500">All students will be disconnected.</span>
               </p>
 
               <div className="flex gap-4">
@@ -493,7 +496,7 @@ function TeacherSessionPage() {
                 </button>
                 <button
                   onClick={confirmEndSession}
-                  className="flex-1 py-4 px-6 rounded-xl border-2 border-ink bg-coral text-white font-black shadow-comic-sm hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2 text-lg group"
+                  className="flex-1 py-4 px-6 rounded-xl border-2 border-ink bg-red-500 text-white font-extrabold shadow-comic-sm hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2 text-lg group"
                 >
                   <span>End It</span>
                   <div className="bg-white/20 p-1 rounded-full group-hover:rotate-90 transition-transform">
@@ -538,11 +541,11 @@ function TeacherSessionPage() {
               </button>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-soft-purple border-2 border-ink rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-coral border-2 border-ink rounded-xl flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black">Question Summary</h3>
+                  <h3 className="text-2xl font-extrabold">Question Summary</h3>
                   <p className="text-slate-500 font-medium">AI analysis of student confusion</p>
                 </div>
               </div>
@@ -681,10 +684,10 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
           prev.map(uf =>
             uf.file === file
               ? {
-                  ...uf,
-                  status: result.error ? 'error' : 'done',
-                  result: { text: result.text, fileName: file.name, error: result.error }
-                }
+                ...uf,
+                status: result.error ? 'error' : 'done',
+                result: { text: result.text, fileName: file.name, error: result.error }
+              }
               : uf
           )
         );
@@ -748,7 +751,7 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
           <X className="w-6 h-6" />
         </button>
 
-        <h3 className="text-2xl font-black mb-1">Class Context</h3>
+        <h3 className="text-2xl font-extrabold mb-1">Class Context</h3>
         <p className="text-slate-500 font-bold mb-4">Upload lecture materials or paste text to help AI understand your class.</p>
 
         {/* Tabs */}
@@ -758,7 +761,7 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
             className={clsx(
               "flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2",
               activeTab === 'upload'
-                ? "bg-soft-purple text-white border-2 border-ink shadow-comic-sm"
+                ? "bg-coral text-white border-2 border-ink shadow-comic-sm"
                 : "bg-slate-100 text-slate-600 border-2 border-transparent hover:border-slate-200"
             )}
           >
@@ -770,7 +773,7 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
             className={clsx(
               "flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2",
               activeTab === 'paste'
-                ? "bg-soft-purple text-white border-2 border-ink shadow-comic-sm"
+                ? "bg-coral text-white border-2 border-ink shadow-comic-sm"
                 : "bg-slate-100 text-slate-600 border-2 border-transparent hover:border-slate-200"
             )}
           >
@@ -791,8 +794,8 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
                 className={clsx(
                   "border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer mb-4",
                   isDragging
-                    ? "border-soft-purple bg-soft-purple/10"
-                    : "border-slate-300 hover:border-soft-purple hover:bg-slate-50"
+                    ? "border-coral bg-coral/5"
+                    : "border-slate-300 hover:border-coral hover:bg-slate-50"
                 )}
                 onClick={() => document.getElementById('file-input')?.click()}
               >
@@ -806,7 +809,7 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
                 />
                 <Upload className={clsx(
                   "w-10 h-10 mx-auto mb-2 transition-colors",
-                  isDragging ? "text-soft-purple" : "text-slate-400"
+                  isDragging ? "text-coral" : "text-slate-400"
                 )} />
                 <p className="font-bold text-slate-700 mb-1">
                   Drop files here or click to browse
@@ -829,12 +832,12 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
                           uf.status === 'error'
                             ? "border-red-200 bg-red-50"
                             : uf.status === 'done'
-                            ? "border-green-200 bg-green-50"
-                            : "border-slate-200 bg-slate-50"
+                              ? "border-green-200 bg-green-50"
+                              : "border-slate-200 bg-slate-50"
                         )}
                       >
                         {uf.status === 'pending' || uf.status === 'uploading' || uf.status === 'parsing' ? (
-                          <Loader2 className="w-4 h-4 text-soft-purple animate-spin shrink-0" />
+                          <Loader2 className="w-4 h-4 text-coral animate-spin shrink-0" />
                         ) : uf.status === 'error' ? (
                           <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                         ) : (
@@ -885,7 +888,7 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               placeholder="Paste lecture notes, slide text, or summaries here..."
-              className="flex-1 w-full border-2 border-ink rounded-xl p-4 font-medium resize-none overflow-y-auto focus:ring-2 focus:ring-soft-purple focus:outline-none min-h-[200px]"
+              className="flex-1 w-full border-2 border-ink rounded-xl p-4 font-medium resize-none overflow-y-auto focus:ring-2 focus:ring-coral focus:outline-none min-h-[200px]"
             />
           )}
         </div>
@@ -910,7 +913,7 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
           <button
             onClick={handleSave}
             disabled={isSaving || isOverLimit || !hasContent}
-            className="px-6 py-3 rounded-xl border-2 border-ink bg-soft-purple text-white font-bold shadow-comic-sm hover:translate-y-0.5 hover:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 rounded-xl border-2 border-ink bg-coral text-white font-bold shadow-comic-sm hover:translate-y-0.5 hover:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? "Saving..." : "Save Context"}
           </button>
@@ -928,7 +931,7 @@ function QuizStatsPanel({ quizId }: { quizId: Id<"quizzes"> }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <div className="text-5xl font-black">{stats.totalResponses}</div>
+        <div className="text-5xl font-extrabold">{stats.totalResponses}</div>
         <div className="text-sm font-bold text-slate-500 leading-tight">Student<br />Responses</div>
       </div>
 
@@ -963,13 +966,13 @@ function QuizStatsPanel({ quizId }: { quizId: Id<"quizzes"> }) {
                     {/* Content */}
                     <div className="relative z-10 w-full h-full flex items-center justify-center gap-3">
                       <span className={clsx(
-                        "font-black text-lg px-2.5 py-0.5 rounded-lg border-2",
+                        "font-extrabold text-lg px-2.5 py-0.5 rounded-lg border-2",
                         isCorrect ? "bg-green-100 border-green-200 text-green-800" : "bg-white border-slate-200 text-slate-600"
                       )}>
                         {String.fromCharCode(65 + j)}
                         {isCorrect && <Check className="w-3.5 h-3.5 inline ml-1" />}
                       </span>
-                      <span className={clsx("text-2xl font-black", isCorrect ? "text-green-900" : "text-slate-700")}>
+                      <span className={clsx("text-2xl font-extrabold", isCorrect ? "text-green-900" : "text-slate-700")}>
                         {count}
                       </span>
                     </div>
@@ -1020,22 +1023,22 @@ function QuestionSummaryPanel({ sessionId }: { sessionId: Id<"sessions"> }) {
     <div className="space-y-4">
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-soft-purple" />
+          <Loader2 className="w-8 h-8 animate-spin text-coral" />
           <span className="ml-3 font-bold text-slate-500">Analyzing questions...</span>
         </div>
       ) : error ? (
-        <div className="bg-coral/10 border-2 border-coral rounded-xl p-4 text-center">
-          <p className="text-coral font-bold">{error}</p>
+        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-center">
+          <p className="text-red-600 font-bold">{error}</p>
           <button
             onClick={generateSummary}
-            className="mt-3 px-4 py-2 bg-coral text-white rounded-lg font-bold hover:bg-coral/90"
+            className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600"
           >
             Try Again
           </button>
         </div>
       ) : summary ? (
         <>
-          <div className="bg-soft-purple/10 border-2 border-soft-purple/30 rounded-xl p-4">
+          <div className="bg-coral/10 border-2 border-coral/20 rounded-xl p-4">
             <p className="text-ink font-medium">{summary.summary}</p>
           </div>
 
