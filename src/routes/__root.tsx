@@ -17,7 +17,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'WaitWhat',
+        title: 'Clarifyd',
       },
     ],
     links: [
@@ -28,7 +28,7 @@ export const Route = createRootRoute({
       {
         rel: 'icon',
         type: 'image/png',
-        href: '/waitwhatthumbnail.png',
+        href: '/clarifyd-icon.png',
       },
     ],
   }),

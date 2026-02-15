@@ -128,7 +128,7 @@ function StudentSessionPage() {
           <div className="w-20 h-20 bg-mustard/20 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-ink">
             <CheckCircle2 className="w-10 h-10 text-ink" />
           </div>
-          <h1 className="text-2xl font-black mb-2">That's a wrap!</h1>
+          <h1 className="text-2xl font-extrabold mb-2">That's a wrap!</h1>
           <p className="text-slate-500 font-bold mb-6">
             The lecture has ended. Great work today.
           </p>
@@ -214,39 +214,43 @@ function StudentSessionPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative h-full transition-all duration-300">
 
-        {/* Header - Absolute Top Right */}
-        <div className="absolute top-6 right-6 z-10 flex items-center gap-3">
-          <button
-            onClick={() => setShowProfileModal(true)}
-            className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
-            title="Profile"
-          >
-            <span className="text-sm">Profile</span>
-          </button>
-          <button
-            onClick={() => setShowLeaderboard(true)}
-            className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
-            title="Leaderboard"
-          >
-            <span>🔥</span>
-            <span className="text-sm tabular-nums">{studentState?.currentStreak ?? 0}</span>
-          </button>
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 hidden lg:flex">
-            {session.roomName || "Classroom"}
+        {/* Header - Absolute Top Left & Right */}
+        <div className="absolute top-6 left-6 right-6 z-10 flex items-center justify-between">
+          {/* Left side: Room name + LIVE */}
+          <div className="flex items-center gap-3">
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-extrabold text-ink flex items-center justify-center gap-2">
+              <div className="w-3 h-3 bg-soft-purple rounded-full animate-pulse border border-ink" />
+              <span className="text-sm tracking-wide">LIVE</span>
+            </div>
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink hidden lg:flex items-center gap-2">
+              {session.roomName || "Classroom"}
+            </div>
           </div>
 
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2">
-            <div className="w-3 h-3 bg-coral rounded-full animate-pulse border border-ink" />
-            <span className="text-sm tracking-wide">LIVE</span>
-          </div>
-
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 min-w-[80px]">
-            <Users className="w-5 h-5 text-ink" />
-            <span>{studentCount ?? "..."}</span>
-          </div>
-
-          <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 font-mono">
-            #{session.code}
+          {/* Right side: Stats + profile */}
+          <div className="flex items-center gap-3">
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 font-mono">
+              #{session.code}
+            </div>
+            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-2 min-w-[80px]">
+              <Users className="w-5 h-5 text-ink" />
+              <span>{studentCount ?? "..."}</span>
+            </div>
+            <button
+              onClick={() => setShowLeaderboard(true)}
+              className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-mustard/20 transition-colors btn-press"
+              title="Leaderboard"
+            >
+              <span>🔥</span>
+              <span className="text-sm tabular-nums">{studentState?.currentStreak ?? 0}</span>
+            </button>
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="bg-white border-2 border-ink rounded-xl px-3 py-2 shadow-comic-sm font-bold text-ink flex items-center justify-center gap-1.5 hover:bg-coral/10 transition-colors btn-press"
+              title="Profile"
+            >
+              <span className="text-sm">Profile</span>
+            </button>
           </div>
         </div>
 
@@ -261,23 +265,7 @@ function StudentSessionPage() {
         {/* Floating Bottom Control Bar */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
 
-          {/* Chat Toggle */}
-          <button
-            onClick={() => {
-              const next = !isQAOpen;
-              setIsQAOpen(next);
-              if (next) setIsVideoOpen(false);
-            }}
-            className={clsx(
-              "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold text-ink flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-slate-100",
-              isQAOpen ? "bg-coral text-white active:bg-coral-dark" : "bg-white"
-            )}
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span>{isQAOpen ? "Close Chat" : "Ask Question"}</span>
-          </button>
-
-          {/* Video Studio Toggle */}
+          {/* Video Studio Toggle — moved first */}
           <button
             onClick={() => {
               const next = !isVideoOpen;
@@ -295,6 +283,22 @@ function StudentSessionPage() {
             <span>{isVideoOpen ? "Close Video" : "Video Studio"}</span>
           </button>
 
+          {/* Chat Toggle — moved second */}
+          <button
+            onClick={() => {
+              const next = !isQAOpen;
+              setIsQAOpen(next);
+              if (next) setIsVideoOpen(false);
+            }}
+            className={clsx(
+              "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold text-ink flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-slate-100",
+              isQAOpen ? "bg-coral text-white active:bg-coral-dark" : "bg-white"
+            )}
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span>{isQAOpen ? "Close Chat" : "Ask Question"}</span>
+          </button>
+
           {/* I'm Lost Button */}
           <motion.button
             animate={studentState?.isLost ? {
@@ -304,7 +308,7 @@ function StudentSessionPage() {
             onClick={handleImLostAction}
             className={clsx(
               "h-14 px-6 rounded-2xl border-2 border-ink shadow-comic font-bold flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
-              studentState?.isLost ? "bg-coral text-white hover:bg-coral-light" : "bg-mustard text-ink hover:bg-mustard-light"
+              studentState?.isLost ? "bg-red-400 text-white hover:bg-red-500" : "bg-mustard text-ink hover:bg-mustard-light"
             )}
           >
             <AlertCircle className="w-6 h-6" />
@@ -453,8 +457,8 @@ function VideoStudioOverlay({
           className="bg-white border-2 border-ink rounded-[2rem] shadow-comic w-full max-w-3xl max-h-[calc(100vh-100px)] overflow-hidden flex flex-col"
         >
           {/* Header */}
-          <div className="px-5 py-4 border-b-2 border-ink bg-deep-purple/10 flex items-center justify-between shrink-0">
-            <h2 className="font-black text-xl flex items-center gap-3">
+          <div className="px-5 py-4 border-b-2 border-ink bg-soft-purple/10 flex items-center justify-between shrink-0">
+            <h2 className="font-extrabold text-xl flex items-center gap-3">
               <div className="w-9 h-9 bg-deep-purple rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
                 <Clapperboard className="w-4 h-4 text-white" />
               </div>
@@ -500,7 +504,7 @@ function VideoStudioOverlay({
                   >
                     <Clapperboard className="w-10 h-10 text-deep-purple" />
                   </motion.div>
-                  <p className="font-black text-lg text-ink">Generating your video...</p>
+                  <p className="font-extrabold text-lg text-ink">Generating your video...</p>
                   <div className="flex gap-1">
                     {[0, 1, 2].map((i) => (
                       <motion.div
@@ -549,7 +553,7 @@ function VideoStudioOverlay({
                 <button
                   onClick={handleTranscriptVideo}
                   disabled={isSubmittingTranscript || isGenerating}
-                  className="w-full bg-soft-purple border-2 border-ink rounded-xl px-5 py-3.5 font-black text-ink shadow-comic-sm btn-press flex items-center justify-center gap-3 disabled:opacity-50 text-base"
+                  className="w-full bg-soft-purple border-2 border-ink rounded-xl px-5 py-3.5 font-extrabold text-white shadow-comic-sm btn-press flex items-center justify-center gap-3 disabled:opacity-50 text-base"
                 >
                   {isSubmittingTranscript || (isGenerating && latestRequest?.triggerType === "transcript") ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -561,7 +565,7 @@ function VideoStudioOverlay({
 
                 <div className="flex items-center gap-3 opacity-40">
                   <div className="flex-1 h-0.5 bg-ink/20" />
-                  <span className="text-xs font-black uppercase tracking-wider">or</span>
+                  <span className="text-xs font-extrabold uppercase tracking-wider">or</span>
                   <div className="flex-1 h-0.5 bg-ink/20" />
                 </div>
 
@@ -576,7 +580,7 @@ function VideoStudioOverlay({
                   <button
                     type="submit"
                     disabled={!prompt.trim() || isSubmittingCustom || isGenerating}
-                    className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-black disabled:opacity-50 flex items-center gap-2"
+                    className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-extrabold disabled:opacity-50 flex items-center gap-2"
                   >
                     {isSubmittingCustom ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -591,7 +595,7 @@ function VideoStudioOverlay({
               {/* Past Videos */}
               {videoRequests && videoRequests.length > 0 && (
                 <div className="pt-2">
-                  <h4 className="font-black text-xs uppercase tracking-wider text-slate-400 mb-3">
+                  <h4 className="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-3">
                     Previous Generations
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -624,10 +628,10 @@ function VideoStudioOverlay({
                           )}
                         >
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">
                               {request.triggerType === "transcript" ? "Lecture" : "Prompt"}
                             </span>
-                            <span className={clsx("text-[10px] px-1.5 py-0.5 rounded-full font-black", statusStyle)}>
+                            <span className={clsx("text-[10px] px-1.5 py-0.5 rounded-full font-extrabold", statusStyle)}>
                               {request.status}
                             </span>
                           </div>
@@ -662,7 +666,7 @@ function VideoStudioOverlay({
             <div className="bg-white/90 backdrop-blur-md border-2 border-ink rounded-2xl px-5 py-3 shadow-comic-sm flex items-center gap-3">
               <div className="shrink-0 flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Live</span>
               </div>
               <p className="font-bold text-ink text-base truncate">
                 {currentTranscriptLine}
@@ -785,8 +789,8 @@ function TranscriptView({
         ) : (
           <>
             <div className="flex items-center gap-2 mb-4 opacity-50 px-2 sticky top-0 z-10 bg-lavender-bg/80 backdrop-blur-sm py-2 -mx-2 rounded-lg">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-black text-xs tracking-widest uppercase text-slate-500">Live Transcript</span>
+              <div className="w-2 h-2 rounded-full bg-soft-purple animate-pulse" />
+              <span className="font-extrabold text-xs tracking-widest uppercase text-slate-500">Live Transcript</span>
               {transcript.length > 50 && (
                 <span className="text-xs text-slate-400 ml-auto">{transcript.length} lines</span>
               )}
@@ -810,7 +814,7 @@ function TranscriptView({
                   >
                     {line.source && isRecent && (
                       <div className="mb-2 inline-flex items-center">
-                        <span className="px-2 py-1 text-[10px] font-black tracking-widest uppercase rounded-lg border-2 border-ink bg-white">
+                        <span className="px-2 py-1 text-[10px] font-extrabold tracking-widest uppercase rounded-lg border-2 border-ink bg-white">
                           {line.source}
                         </span>
                       </div>
@@ -911,9 +915,9 @@ function ChatOverlay({
           className="bg-white border-2 border-ink rounded-[2rem] shadow-comic w-full max-w-2xl max-h-[calc(100vh-100px)] overflow-hidden flex flex-col"
         >
           {/* Header */}
-          <div className="px-5 py-4 border-b-2 border-ink bg-coral/10 flex items-center justify-between shrink-0">
-            <h2 className="font-black text-xl flex items-center gap-3">
-              <div className="w-9 h-9 bg-coral rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
+          <div className="px-5 py-4 border-b-2 border-ink bg-mustard/10 flex items-center justify-between shrink-0">
+            <h2 className="font-extrabold text-xl flex items-center gap-3">
+              <div className="w-9 h-9 bg-mustard rounded-xl border-2 border-ink shadow-comic-sm flex items-center justify-center">
                 {instructorAvatar ? (
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-ink bg-white">
                     <AvatarPreview avatar={instructorAvatar} size="sm" />
@@ -968,7 +972,7 @@ function ChatOverlay({
                           ) : (
                             <Sparkles className="w-3 h-3 text-soft-purple fill-current" />
                           )}
-                          <span className="text-[10px] font-black uppercase tracking-wider">{instructorName || "AI"}</span>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider">{instructorName || "AI"}</span>
                         </div>
                         {q.answer}
                       </div>
@@ -997,7 +1001,7 @@ function ChatOverlay({
               <button
                 type="submit"
                 disabled={!input.trim() || isAsking}
-                className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-black disabled:opacity-30 flex items-center gap-2"
+                className="px-5 py-3.5 bg-coral text-white border-2 border-ink rounded-xl shadow-comic-sm btn-press font-extrabold disabled:opacity-30 flex items-center gap-2"
               >
                 {isAsking ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 <span className="hidden sm:inline">Send</span>
@@ -1019,7 +1023,7 @@ function ChatOverlay({
             <div className="bg-white/90 backdrop-blur-md border-2 border-ink rounded-2xl px-5 py-3 shadow-comic-sm flex items-center gap-3">
               <div className="shrink-0 flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Live</span>
               </div>
               <p className="font-bold text-ink text-base truncate">
                 {currentTranscriptLine}
@@ -1082,7 +1086,7 @@ function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
           <div className="w-20 h-20 bg-green-100 border-2 border-ink rounded-full flex items-center justify-center mx-auto mb-6">
             <ThumbsUp className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-3xl font-black text-ink mb-2">You're Awesome!</h2>
+          <h2 className="text-3xl font-extrabold text-ink mb-2">You're Awesome!</h2>
           <p className="text-slate-500 font-bold">Responses sent.</p>
         </motion.div>
       </motion.div>
@@ -1093,8 +1097,8 @@ function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-ink/20 backdrop-blur-md z-[100] flex items-center justify-center p-4">
       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} className="bg-white border-2 border-ink rounded-[2rem] p-6 max-w-xl w-full shadow-comic my-8 max-h-[85vh] overflow-y-auto custom-scrollbar">
         <div className="text-center mb-8">
-          <span className="inline-block px-4 py-1 bg-mustard border-2 border-ink font-black rounded-lg text-xs uppercase tracking-wider mb-3 shadow-comic-sm">Pop Quiz</span>
-          <h2 className="text-3xl font-black text-ink">Quick Check!</h2>
+          <span className="inline-block px-4 py-1 bg-mustard border-2 border-ink font-extrabold rounded-lg text-xs uppercase tracking-wider mb-3 shadow-comic-sm">Pop Quiz</span>
+          <h2 className="text-3xl font-extrabold text-ink">Quick Check!</h2>
         </div>
 
         <div className="space-y-8">
@@ -1123,7 +1127,7 @@ function QuizModal({ quiz, studentId }: { quiz: any; studentId: string }) {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting || answers.some(a => a === -1)}
-          className="w-full mt-8 py-4 bg-ink hover:bg-slate-800 text-white font-black text-lg rounded-2xl shadow-comic transition-all disabled:opacity-50 disabled:shadow-comic-sm btn-press"
+          className="w-full mt-8 py-4 bg-coral hover:bg-coral-dark text-white font-extrabold text-lg rounded-2xl shadow-comic transition-all disabled:opacity-50 disabled:shadow-comic-sm btn-press"
         >
           {isSubmitting ? "Sending..." : "Submit Answers"}
         </button>

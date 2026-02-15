@@ -1,6 +1,6 @@
 # Playwright E2E Tests
 
-Comprehensive end-to-end tests for WaitWhat covering critical user flows.
+Comprehensive end-to-end tests for Clarifyd covering critical user flows.
 
 ## Running Tests
 

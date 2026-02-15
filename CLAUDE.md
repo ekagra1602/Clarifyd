@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WaitWhat is a Convex-powered real-time lecture engagement platform. Teachers start sessions with join codes, students join to view live transcripts, ask AI questions, take quizzes, and signal when they're lost.
+Clarifyd is a Convex-powered real-time lecture engagement platform. Teachers start sessions with join codes, students join to view live transcripts, ask AI questions, take quizzes, and signal when they're lost.
 
 ## Technology Stack
 

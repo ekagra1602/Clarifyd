@@ -45,8 +45,8 @@ export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions">
       </button>
 
       {isRecording && (
-        <div className="flex items-center gap-2 text-green-600 font-bold text-sm">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse border border-green-600" />
+        <div className="flex items-center gap-2 text-soft-purple font-bold text-sm">
+          <div className="w-3 h-3 bg-soft-purple rounded-full animate-pulse border border-deep-purple" />
           Live transcription active
         </div>
       )}

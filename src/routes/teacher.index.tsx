@@ -69,53 +69,22 @@ function TeacherIndexPage() {
         <div className="min-h-screen bg-lavender-bg py-12 px-6 flex items-center justify-center">
             <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                {/* Left Column: Avatar Editor */}
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-comic border-2 border-ink text-center flex flex-col justify-center">
-                    <h2 className="text-2xl font-black text-ink mb-6">Your Avatar</h2>
-
-                    <div className="bg-checkered rounded-2xl p-6 mb-6 inline-block mx-auto border-2 border-ink shadow-inner w-full max-w-[280px]">
-                        <AvatarPreview avatar={avatar} size="lg" />
-                    </div>
-
-                    <div className="space-y-3 max-w-xs mx-auto w-full">
-                        {Object.entries(options).map(([key, _]) => (
-                            <div key={key} className="flex items-center justify-between bg-slate-50 rounded-xl p-2 border-2 border-slate-200">
-                                <button
-                                    onClick={() => cycleOption(key as any, -1)}
-                                    className="p-1 hover:bg-slate-200 rounded-lg transition-colors"
-                                >
-                                    <ChevronLeft className="w-5 h-5 text-slate-400" />
-                                </button>
-                                <span className="text-xs font-black uppercase tracking-widest text-slate-500">
-                                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                                </span>
-                                <button
-                                    onClick={() => cycleOption(key as any, 1)}
-                                    className="p-1 hover:bg-slate-200 rounded-lg transition-colors"
-                                >
-                                    <ChevronRight className="w-5 h-5 text-slate-400" />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Right Column: Class Details */}
+                {/* Left Column: Class Details — swapped to left */}
                 <div className="bg-white p-12 rounded-[2.5rem] shadow-comic border-2 border-ink text-center relative overflow-hidden flex flex-col justify-center">
-                    <div className="absolute top-0 left-0 w-full h-4 bg-coral border-b-2 border-ink" />
+                    <div className="absolute top-0 left-0 w-full h-4 bg-soft-purple border-b-2 border-ink" />
 
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-soft-purple rounded-2xl border-2 border-ink shadow-comic-sm mb-6 rotate-3 mx-auto">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-coral rounded-2xl border-2 border-ink shadow-comic-sm mb-6 -rotate-3 mx-auto">
                         <Play className="w-10 h-10 text-white fill-current" />
                     </div>
 
-                    <h1 className="text-4xl font-black text-ink mb-2">Teacher Console</h1>
+                    <h1 className="text-4xl font-extrabold text-ink mb-2">Teacher Console</h1>
                     <p className="text-slate-500 font-bold text-lg mb-8">
                         Setup your virtual classroom.
                     </p>
 
                     <div className="space-y-6 mb-8 text-left">
                         <div>
-                            <label className="block font-black text-ink mb-2 ml-1">Your Name</label>
+                            <label className="block font-extrabold text-ink mb-2 ml-1">Your Name</label>
                             <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
@@ -129,7 +98,7 @@ function TeacherIndexPage() {
                         </div>
 
                         <div>
-                            <label className="block font-black text-ink mb-2 ml-1">Class Name</label>
+                            <label className="block font-extrabold text-ink mb-2 ml-1">Class Name</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Biology 101"
@@ -143,7 +112,7 @@ function TeacherIndexPage() {
                     <button
                         onClick={handleStartSession}
                         disabled={isCreating || !instructorName.trim()}
-                        className="w-full inline-flex items-center justify-center gap-3 px-8 py-5 bg-coral hover:bg-coral-dark disabled:opacity-50 text-white font-black rounded-2xl shadow-comic text-xl border-2 border-ink btn-press"
+                        className="w-full inline-flex items-center justify-center gap-3 px-8 py-5 bg-coral hover:bg-coral-dark disabled:opacity-50 text-white font-extrabold rounded-2xl shadow-comic text-xl border-2 border-ink btn-press"
                     >
                         {isCreating ? (
                             <>
@@ -157,6 +126,37 @@ function TeacherIndexPage() {
                             </>
                         )}
                     </button>
+                </div>
+
+                {/* Right Column: Avatar Editor — swapped to right */}
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-comic border-2 border-ink text-center flex flex-col justify-center">
+                    <h2 className="text-2xl font-extrabold text-ink mb-6">Your Avatar</h2>
+
+                    <div className="bg-checkered rounded-2xl p-6 mb-6 inline-block mx-auto border-2 border-ink shadow-inner w-full max-w-[280px]">
+                        <AvatarPreview avatar={avatar} size="lg" />
+                    </div>
+
+                    <div className="space-y-3 max-w-xs mx-auto w-full">
+                        {Object.entries(options).map(([key, _]) => (
+                            <div key={key} className="flex items-center justify-between bg-lavender-bg rounded-xl p-2 border-2 border-slate-200">
+                                <button
+                                    onClick={() => cycleOption(key as any, -1)}
+                                    className="p-1 hover:bg-white rounded-lg transition-colors"
+                                >
+                                    <ChevronLeft className="w-5 h-5 text-slate-400" />
+                                </button>
+                                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                                </span>
+                                <button
+                                    onClick={() => cycleOption(key as any, 1)}
+                                    className="p-1 hover:bg-white rounded-lg transition-colors"
+                                >
+                                    <ChevronRight className="w-5 h-5 text-slate-400" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

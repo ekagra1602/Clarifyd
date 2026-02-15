@@ -26,11 +26,11 @@ export function StudentQuestionFeed({ sessionId }: StudentQuestionFeedProps) {
     return (
         <div className="bg-milk border-2 border-ink rounded-[2rem] p-6 shadow-comic flex flex-col h-[500px]">
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-coral border-2 border-ink rounded-xl flex items-center justify-center shadow-sm transform -rotate-2">
+                <div className="w-12 h-12 bg-soft-purple border-2 border-ink rounded-xl flex items-center justify-center shadow-sm transform rotate-2">
                     <MessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                    <h2 className="text-xl font-black">Student Questions</h2>
+                    <h2 className="text-xl font-extrabold">Student Questions</h2>
                     <p className="text-slate-500 font-bold text-sm">{questions.length} questions asked</p>
                 </div>
             </div>
@@ -65,9 +65,9 @@ export function StudentQuestionFeed({ sessionId }: StudentQuestionFeedProps) {
                             </div>
 
                             {q.answer && (
-                                <div className="mt-3 pl-4 border-l-4 border-soft-purple">
+                                <div className="mt-3 pl-4 border-l-4 border-coral">
                                     <p className="text-sm font-medium text-slate-600">
-                                        <span className="text-soft-purple font-black mr-1">AI:</span>
+                                        <span className="text-coral font-extrabold mr-1">AI:</span>
                                         {q.answer}
                                     </p>
                                 </div>

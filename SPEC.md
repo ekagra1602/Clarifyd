@@ -1,4 +1,4 @@
-# WaitWhat — Technical Specification
+# Clarifyd — Technical Specification
 
 A Convex-powered real-time lecture engagement platform.
 
@@ -6,7 +6,7 @@ A Convex-powered real-time lecture engagement platform.
 
 ### 1.1 Purpose
 
-WaitWhat enables real-time student engagement during live lectures through:
+Clarifyd enables real-time student engagement during live lectures through:
 - Live transcription display
 - AI-powered Q&A grounded in lecture content
 - Teacher-triggered comprehension quizzes (CFU)
