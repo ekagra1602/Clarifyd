@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Clarifyd is a Convex-powered real-time lecture engagement platform. Teachers start sessions with join codes, students join to view live transcripts, ask AI questions, take quizzes, and signal when they're lost.
+Clarifyd is a Convex-powered real-time lecture engagement platform. Teachers start sessions with join codes, students join to view live transcripts, ask AI questions, and take quizzes.
 
 ## Technology Stack
 
 - **Backend**: Convex (real-time database, mutations/queries, no custom WebSocket needed)
 - **Frontend**: React (Teacher Console + Student UI)
 - **Transcription**: AssemblyAI real-time streaming (browser → AssemblyAI WebSocket → Convex mutation)
-- **AI**: Claude Sonnet 4 for Q&A, quiz generation, lost summaries, and session notes
+- **AI**: Claude Sonnet 4 for Q&A, quiz generation, and session notes
 
 ## Architecture
 
@@ -49,8 +49,8 @@ The system uses Convex's real-time subscriptions for all live updates. Clients s
 - `transcriptLines` - **Append-only** transcript segments (critical for real-time performance)
 - `quizzes` - Quiz definitions with MCQ questions array
 - `quizResponses` - Student answers to quizzes
-- `lostEvents` - "I'm lost" signals for spike detection
-- `students` - Joined students with presence heartbeats, lost status, and AI-generated summaries
+- `lostEvents` - Historical signal events (deprecated in UI)
+- `students` - Joined students with presence heartbeats and AI-generated summaries
 - `questions` - Student Q&A pairs with AI responses
 
 ### Key Design Decisions
@@ -73,8 +73,8 @@ The AI system lives in `convex/ai/` with these components:
 **AI Features:**
 - Q&A with lecture context grounding
 - Quiz generation from transcript content since last quiz (falls back to 5-minute window for first quiz)
-- Lost summaries (AI-generated catch-up for confused students)
 - Session notes (PDF-exportable summary)
+- Question summary (AI analysis of student question patterns)
 
 **Quiz Generation Context:**
 - Uses content since last quiz's `createdAt` timestamp (prevents overlap between consecutive quizzes)
@@ -88,8 +88,7 @@ Implementation follows 4 phases in order (each depends on the previous):
 
 1. **Core Session + Transcript**: Schema, session management, real-time transcript
 2. **Quiz System**: Quiz tables, launch/submit mutations, stats queries, modal UI
-3. **Lost Signals**: lostEvents table, markLost mutation, spike detection
-4. **AI Integration**: questions table, askQuestion/saveAnswer, slide upload, context builder
+3. **AI Integration**: questions table, askQuestion/saveAnswer, slide upload, context builder
 
 ## Commands
 
@@ -109,7 +108,6 @@ npm run dev             # Start frontend + Convex dev servers
 - `saveTranscriptFromBrowser` - Add transcript from browser (direct mutation)
 - `uploadSlides` - Add context for AI
 - `generateAndLaunchQuiz`, `submitQuiz`, `closeQuiz` - Quiz operations
-- `markLost`, `clearLostStatus` - Lost signal operations
 - `askQuestion`, `saveAnswer` - Q&A operations
 - `heartbeat` - Student presence tracking
 
@@ -118,11 +116,9 @@ npm run dev             # Start frontend + Convex dev servers
 - `listTranscript` - Last N lines (default 200)
 - `getActiveQuiz`, `getQuizStats` - Quiz data and analytics
 - `getLastQuizForSession` (internal) - Most recent quiz for context filtering
-- `getLostSpikeStats` - Lost event analytics (60s, 5m windows)
 - `listRecentQuestions` - Q&A feed (default 20)
-- `getStudentCount`, `getLostStudentCount` - Student presence stats
+- `getStudentCount` - Student presence stats
 
 ### Actions (AI Operations)
 - `getStreamingToken` - Get AssemblyAI token (validates session first)
 - `generateSessionNotes` - Generate PDF-exportable session summary
-- `generateLostSummary` - AI catch-up summary for lost students
