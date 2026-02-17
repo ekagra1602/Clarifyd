@@ -12,41 +12,43 @@ export function TranscriptionControls({ sessionId }: { sessionId: Id<"sessions">
   } = useRealtimeTranscription({ sessionId });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error && (
-        <div className="text-red-600 text-sm bg-red-50 border-2 border-red-200 p-3 rounded-xl font-medium">
+        <div className="text-accent text-sm bg-accent/10 border border-accent/20 p-3 rounded-xl font-medium">
           {error}
         </div>
       )}
 
-      {/* Live mic transcription */}
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={isConnecting}
-        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 border-ink font-bold text-lg transition-all shadow-comic-sm hover:shadow-comic hover:-translate-y-0.5 active:translate-y-0 active:shadow-comic-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-comic-sm disabled:hover:translate-y-0 ${isRecording ? "bg-coral text-white" : "bg-soft-purple text-white"
-          }`}
+        className={`w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl font-semibold transition-all btn-press disabled:opacity-40 ${
+          isRecording
+            ? "bg-accent text-white shadow-glow-accent"
+            : "bg-gradient-to-r from-secondary to-secondary-light text-white shadow-glow-secondary"
+        }`}
       >
         {isConnecting ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
             Connecting...
           </>
         ) : isRecording ? (
           <>
-            <MicOff className="w-5 h-5" />
+            <MicOff className="w-4 h-4" />
             Stop Transcription
           </>
         ) : (
           <>
-            <Mic className="w-5 h-5" />
+            <Mic className="w-4 h-4" />
             Start Transcription
           </>
         )}
       </button>
 
       {isRecording && (
-        <div className="flex items-center gap-2 text-soft-purple font-bold text-sm">
-          <div className="w-3 h-3 bg-soft-purple rounded-full animate-pulse border border-deep-purple" />
+        <div className="flex items-center gap-2 text-lime text-sm font-medium">
+          <div className="w-2 h-2 bg-lime rounded-full animate-pulse" />
           Live transcription active
         </div>
       )}

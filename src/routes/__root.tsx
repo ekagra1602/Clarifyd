@@ -5,7 +5,6 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import Header from '../components/Header'
 
 import appCss from '../styles.css?url'
-import logo from '../logo.png'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -19,18 +18,12 @@ export const Route = createRootRoute({
       },
       {
         title: 'Clarifyd',
-        title: 'Clarifyd',
       },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
-      },
-      {
-        rel: 'icon',
-        type: 'image/png',
-        href: logo,
       },
     ],
   }),
@@ -40,11 +33,11 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-bg-primary text-text-primary">
         <Header />
         {children}
         {import.meta.env.DEV && (

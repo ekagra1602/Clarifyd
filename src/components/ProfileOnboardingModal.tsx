@@ -3,7 +3,8 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
+import clsx from "clsx";
 import { AvatarPreview } from "./AvatarPreview";
 import {
   DICEBEAR_STYLES,
@@ -49,16 +50,6 @@ type ProfileForm = {
   learningPreference: string[];
   pacePreference: string;
   otherAccessibility: string;
-};
-
-const defaultForm: ProfileForm = {
-  displayName: "",
-  avatar: { style: DEFAULT_AVATAR.style, seed: "default" },
-  accessibility: [],
-  languagePreference: "en",
-  learningPreference: ["step_by_step"],
-  pacePreference: "normal",
-  otherAccessibility: "",
 };
 
 function cycleOption<T extends { id: string }>(options: readonly T[], current: string): string {
@@ -204,7 +195,7 @@ export function ProfileOnboardingModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-ink/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -212,52 +203,39 @@ export function ProfileOnboardingModal({
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border-2 border-ink rounded-2xl shadow-comic max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="card-glass max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col"
       >
-        <div className="p-4 border-b-2 border-ink bg-mustard/20 flex items-center justify-between shrink-0">
-          <h2 className="text-xl font-extrabold text-ink">
+        <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
+          <h2 className="text-lg font-display font-bold text-text-primary">
             {isEdit ? "Edit Profile" : "Create Your Profile"}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-black/5 rounded-full transition-colors group"
-          >
-            <div className="w-5 h-5 relative flex items-center justify-center">
-              <div className="absolute w-full h-0.5 bg-ink rotate-45 group-hover:bg-coral transition-colors" />
-              <div className="absolute w-full h-0.5 bg-ink -rotate-45 group-hover:bg-coral transition-colors" />
-            </div>
+          <button type="button" onClick={onClose} className="p-2 hover:bg-bg-elevated rounded-lg transition-colors">
+            <X className="w-4 h-4 text-text-muted" />
           </button>
         </div>
 
-        <div className="overflow-y-auto p-4 space-y-6 custom-scrollbar">
-          {/* Avatar (DiceBear - toggle style with arrows) */}
+        <div className="overflow-y-auto p-5 space-y-6">
+          {/* Avatar */}
           <div>
-            <div className="bg-slate-50 border-2 border-ink/20 rounded-xl p-4">
+            <div className="bg-bg-elevated border border-border rounded-xl p-4">
               <AvatarPreview avatar={form.avatar} />
               <div className="flex items-center justify-center gap-3 mt-4">
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setAvatar("style", prevOption(DICEBEAR_STYLES, form.avatar.style))}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-ink bg-white shadow-comic-sm hover:bg-slate-50 btn-press"
-                  title="Previous style"
+                  className="w-9 h-9 flex items-center justify-center rounded-lg bg-bg-input border border-border hover:bg-bg-card-hover transition-colors btn-press"
                 >
-                  <ChevronLeft className="w-5 h-5 text-ink" />
+                  <ChevronLeft className="w-4 h-4 text-text-muted" />
                 </button>
-                <button
-                  type="button"
-                  onClick={shuffleAvatar}
-                  className="py-2 px-4 rounded-xl border-2 border-ink bg-white font-bold text-ink text-sm shadow-comic-sm hover:bg-mustard/20 btn-press"
+                <button type="button" onClick={shuffleAvatar}
+                  className="py-2 px-4 rounded-lg bg-bg-input border border-border font-semibold text-text-secondary text-xs hover:bg-bg-card-hover transition-colors btn-press"
                 >
-                  Shuffle (new look)
+                  Shuffle
                 </button>
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setAvatar("style", cycleOption(DICEBEAR_STYLES, form.avatar.style))}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-ink bg-white shadow-comic-sm hover:bg-slate-50 btn-press"
-                  title="Next style"
+                  className="w-9 h-9 flex items-center justify-center rounded-lg bg-bg-input border border-border hover:bg-bg-card-hover transition-colors btn-press"
                 >
-                  <ChevronRight className="w-5 h-5 text-ink" />
+                  <ChevronRight className="w-4 h-4 text-text-muted" />
                 </button>
               </div>
             </div>
@@ -265,46 +243,42 @@ export function ProfileOnboardingModal({
 
           {/* Display name */}
           <div>
-            <label className="block text-sm font-bold text-ink mb-1">Display name (optional)</label>
-            <input
-              type="text"
-              value={form.displayName}
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Display name (optional)</label>
+            <input type="text" value={form.displayName}
               onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
               placeholder="How should we call you?"
-              className="w-full px-4 py-3 border-2 border-ink rounded-xl text-ink placeholder-slate-400 outline-none focus:border-coral font-medium"
-            />
+              className="w-full px-4 py-3 bg-bg-input border border-border rounded-xl text-text-primary placeholder-text-muted outline-none focus:border-primary/40 font-medium text-sm transition-all" />
           </div>
 
           {/* Language */}
           <div>
-            <label className="block text-sm font-bold text-ink mb-2">Preferred language</label>
-            <select
-              value={form.languagePreference}
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Preferred language</label>
+            <select value={form.languagePreference}
               onChange={(e) => setForm((f) => ({ ...f, languagePreference: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-ink rounded-xl text-ink outline-none focus:border-coral font-medium bg-white"
+              className="w-full px-4 py-3 bg-bg-input border border-border rounded-xl text-text-primary outline-none focus:border-primary/40 font-medium text-sm"
             >
-              {LANGUAGES.map((l) => (
-                <option key={l.id} value={l.id}>{l.label}</option>
-              ))}
+              {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
             </select>
           </div>
 
           {/* Learning preference */}
           <div>
-            <p className="text-sm font-bold text-ink mb-2">Learning style (pick at least one)</p>
+            <p className="text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Learning style</p>
             <div className="flex flex-wrap gap-2">
               {LEARNING_OPTIONS.map((o) => (
-                <label
-                  key={o.id}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-ink cursor-pointer hover:bg-slate-50 has-[:checked]:bg-mustard/30 has-[:checked]:border-ink"
+                <label key={o.id}
+                  className={clsx(
+                    "inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all text-xs font-medium",
+                    form.learningPreference.includes(o.id)
+                      ? "bg-primary/15 border-primary/25 text-primary-light"
+                      : "bg-bg-input border-border text-text-muted hover:border-border-hover"
+                  )}
                 >
-                  <input
-                    type="checkbox"
+                  <input type="checkbox"
                     checked={form.learningPreference.includes(o.id)}
                     onChange={() => toggleLearning(o.id)}
-                    className="rounded border-2 border-ink"
-                  />
-                  <span className="text-sm font-bold text-ink">{o.label}</span>
+                    className="sr-only" />
+                  {o.label}
                 </label>
               ))}
             </div>
@@ -312,21 +286,22 @@ export function ProfileOnboardingModal({
 
           {/* Pace */}
           <div>
-            <label className="block text-sm font-bold text-ink mb-2">Pace</label>
+            <label className="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Pace</label>
             <div className="flex flex-wrap gap-2">
               {PACE_OPTIONS.map((o) => (
-                <label
-                  key={o.id}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-ink cursor-pointer hover:bg-slate-50 has-[:checked]:bg-soft-purple/20 has-[:checked]:border-soft-purple"
+                <label key={o.id}
+                  className={clsx(
+                    "inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all text-xs font-medium",
+                    form.pacePreference === o.id
+                      ? "bg-secondary/15 border-secondary/25 text-secondary-light"
+                      : "bg-bg-input border-border text-text-muted hover:border-border-hover"
+                  )}
                 >
-                  <input
-                    type="radio"
-                    name="pace"
+                  <input type="radio" name="pace"
                     checked={form.pacePreference === o.id}
                     onChange={() => setForm((f) => ({ ...f, pacePreference: o.id }))}
-                    className="border-2 border-ink"
-                  />
-                  <span className="text-sm font-bold text-ink">{o.label}</span>
+                    className="sr-only" />
+                  {o.label}
                 </label>
               ))}
             </div>
@@ -334,52 +309,46 @@ export function ProfileOnboardingModal({
 
           {/* Accessibility */}
           <div>
-            <p className="text-sm font-bold text-ink mb-2">Accessibility & needs (optional)</p>
+            <p className="text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Accessibility (optional)</p>
             <div className="space-y-2">
               {ACCESSIBILITY_OPTIONS.map((o) => (
-                <label
-                  key={o.id}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-ink/40 cursor-pointer hover:bg-slate-50 has-[:checked]:bg-coral/10 has-[:checked]:border-coral"
+                <label key={o.id}
+                  className={clsx(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all text-xs font-medium",
+                    form.accessibility.includes(o.id)
+                      ? "bg-accent/10 border-accent/20 text-accent-light"
+                      : "bg-bg-input border-border text-text-muted hover:border-border-hover"
+                  )}
                 >
-                  <input
-                    type="checkbox"
+                  <input type="checkbox"
                     checked={form.accessibility.includes(o.id)}
                     onChange={() => toggleAccessibility(o.id)}
-                    className="rounded border-2 border-ink"
-                  />
-                  <span className="text-sm font-medium text-ink">{o.label}</span>
+                    className="sr-only" />
+                  {o.label}
                 </label>
               ))}
             </div>
-            <input
-              type="text"
-              value={form.otherAccessibility}
+            <input type="text" value={form.otherAccessibility}
               onChange={(e) => setForm((f) => ({ ...f, otherAccessibility: e.target.value }))}
               placeholder="Other (optional)"
-              className="mt-2 w-full px-4 py-2 border-2 border-ink/40 rounded-xl text-sm text-ink placeholder-slate-400 outline-none focus:border-coral"
-            />
+              className="mt-2 w-full px-4 py-2.5 bg-bg-input border border-border rounded-xl text-xs text-text-primary placeholder-text-muted outline-none focus:border-primary/40 transition-all" />
           </div>
         </div>
 
-        <div className="p-4 border-t-2 border-ink flex flex-col gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={handleSave}
+        <div className="p-4 border-t border-border flex flex-col gap-2 shrink-0">
+          <button type="button" onClick={handleSave}
             disabled={saving || form.learningPreference.length === 0}
-            className="w-full py-3 bg-coral hover:bg-coral-dark disabled:opacity-50 text-white font-extrabold rounded-xl border-2 border-ink shadow-comic btn-press flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-xl shadow-glow btn-press flex items-center justify-center gap-2 disabled:opacity-40"
           >
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Save
           </button>
           {!isEdit && (
-            <button
-              type="button"
-              onClick={handleSkip}
-              disabled={skipLoading}
-              className="w-full py-2 text-slate-500 font-bold text-sm hover:text-ink transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            <button type="button" onClick={handleSkip} disabled={skipLoading}
+              className="w-full py-2 text-text-muted font-medium text-xs hover:text-text-secondary transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
             >
-              {skipLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Skip for now (use defaults)
+              {skipLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+              Skip for now
             </button>
           )}
         </div>

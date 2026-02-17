@@ -24,7 +24,8 @@ import {
   FileText,
   AlertCircle,
   CheckCircle2,
-  Trash2
+  Trash2,
+  Trophy,
 } from "lucide-react";
 import { TranscriptionControls } from "../components/TranscriptionControls";
 import { LeaderboardModal } from "../components/LeaderboardModal";
@@ -41,16 +42,13 @@ function TeacherSessionPage() {
   const { sessionId } = Route.useParams();
   const navigate = useNavigate();
 
-  // Batched query for all teacher page data (reduces 4 queries to 1)
   const pageData = useQuery(api.sessions.getTeacherPageData, {
     sessionId: sessionId as Id<"sessions">,
   });
 
-  // Destructure for backwards compatibility
   const session = pageData?.session;
   const activeQuiz = pageData?.activeQuiz;
   const studentCount = pageData?.studentCount;
-  const lostStudentCount = pageData?.lostStudentCount;
 
   const generateAndLaunchQuiz = useMutation(api.quizzes.generateAndLaunchQuiz);
   const closeQuiz = useMutation(api.quizzes.closeQuiz);
@@ -92,8 +90,6 @@ function TeacherSessionPage() {
     }
   };
 
-  // Generate QR code on client side only when modal is opened or session code changes
-  // Uses dynamic import to avoid bundling qrcode in SSR (requires node:stream/web)
   useEffect(() => {
     if (showQrModal && !qrDataUrl && session?.code) {
       const url = `${window.location.origin}/join?code=${session.code}`;
@@ -108,35 +104,35 @@ function TeacherSessionPage() {
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-coral border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (session.status === "ended") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-milk border-2 border-ink rounded-3xl p-12 shadow-comic text-center max-w-lg w-full">
-          <div className="w-20 h-20 bg-soft-purple rounded-full border-2 border-ink flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10 text-white" />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-aurora bg-grid">
+        <div className="card-glass p-10 text-center max-w-md w-full">
+          <div className="w-16 h-16 rounded-2xl bg-secondary/15 border border-secondary/20 flex items-center justify-center mx-auto mb-6">
+            <Check className="w-8 h-8 text-secondary-light" />
           </div>
-          <h1 className="text-4xl font-extrabold mb-4">Class Dismissed!</h1>
-          <p className="text-lg font-medium text-slate-500 mb-8">Great session today.</p>
+          <h1 className="text-2xl font-display font-bold mb-3">Class Dismissed</h1>
+          <p className="text-text-muted mb-8">Great session today.</p>
 
           <button
             onClick={handleDownloadNotes}
             disabled={isGeneratingNotes}
-            className="w-full bg-white border-2 border-ink text-ink font-bold py-3 px-6 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 mb-4 shadow-comic-sm hover:translate-y-0.5 hover:shadow-none btn-press"
+            className="w-full card-glass-hover py-3 px-5 font-semibold text-text-primary flex items-center justify-center gap-2 mb-3 btn-press"
           >
             {isGeneratingNotes ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Generating Notes...</span>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating Notes...
               </>
             ) : (
               <>
-                <Download className="w-5 h-5" />
-                <span>Download Summary Notes</span>
+                <Download className="w-4 h-4" />
+                Download Summary Notes
               </>
             )}
           </button>
@@ -161,7 +157,6 @@ function TeacherSessionPage() {
   const handleLaunchQuiz = async () => {
     setIsLaunchingQuiz(true);
     try {
-      // Use AI to generate quiz from recent transcript
       await generateAndLaunchQuiz({
         sessionId: sessionId as Id<"sessions">,
         questionCount: 3,
@@ -170,7 +165,6 @@ function TeacherSessionPage() {
     } catch (error) {
       console.error("Failed to launch quiz:", error);
     }
-    // Keep loading state for a bit since AI generation is async
     setTimeout(() => setIsLaunchingQuiz(false), 2000);
   };
 
@@ -179,62 +173,62 @@ function TeacherSessionPage() {
   };
 
   const confirmEndSession = async () => {
-    // Add a small delay for the button animation
     await new Promise(resolve => setTimeout(resolve, 150));
     await endSession({ sessionId: sessionId as Id<"sessions"> });
     await navigate({ to: "/teacher" });
   };
 
   return (
-    <div className="min-h-screen p-6 pb-20">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen p-5 pb-20 bg-grid">
+      <div className="max-w-7xl mx-auto space-y-5">
 
-        {/* Helper Header */}
-        <div className="flex justify-start pb-2">
-          <button onClick={handleEndSession} className="flex items-center gap-2">
-            <div className="bg-coral text-white px-4 py-1 rounded-lg border-2 border-transparent hover:border-ink hover:bg-white hover:text-coral transition-all transform -rotate-1">
-              <span className="text-xl font-extrabold tracking-tight">Clarifyd</span>
+        {/* Logo / nav */}
+        <div className="flex justify-start pb-1">
+          <button onClick={handleEndSession} className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <span className="text-white font-display font-bold text-xs">C</span>
             </div>
+            <span className="font-display font-bold text-text-primary text-base tracking-tight group-hover:text-primary-light transition-colors">clarifyd</span>
           </button>
         </div>
 
-        {/* Top Navbar Card */}
-        <div className="bg-milk border-2 border-ink rounded-2xl p-4 md:p-6 shadow-comic flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="bg-soft-purple text-white px-4 py-1 rounded-full border-2 border-ink font-bold transform -rotate-1 shadow-comic-sm">
-              LIVE
+        {/* Top Bar */}
+        <div className="card-glass px-5 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-lime/15 border border-lime/20">
+              <div className="w-2 h-2 rounded-full bg-lime animate-pulse" />
+              <span className="text-xs font-semibold text-lime tracking-wide">LIVE</span>
             </div>
-            <h1 className="text-2xl font-extrabold">{session.roomName || "Classroom"}</h1>
+            <h1 className="text-lg font-display font-bold text-text-primary">{session.roomName || "Classroom"}</h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden md:block font-bold text-slate-500 mr-2">Join Code:</div>
-            <div className="bg-mustard/20 px-4 py-2 rounded-xl border-2 border-ink border-dashed font-mono font-bold text-xl tracking-widest">
+          <div className="flex items-center gap-2.5">
+            <div className="px-3.5 py-2 rounded-lg bg-bg-input border border-border font-mono font-semibold text-sm text-primary-light tracking-widest">
               {session.code}
             </div>
-            <div className="bg-white border-2 border-ink rounded-xl px-4 py-2 shadow-comic-sm flex items-center gap-2 font-bold min-w-[100px] justify-center">
-              <Users className="w-5 h-5 text-ink" />
-              <span>{studentCount ?? "..."} Students</span>
+            <div className="px-3.5 py-2 rounded-lg bg-bg-input border border-border font-semibold text-sm text-text-secondary flex items-center gap-2">
+              <Users className="w-4 h-4 text-text-muted" />
+              <span>{studentCount ?? "..."}</span>
             </div>
             <button
               onClick={() => setShowQrModal(true)}
-              className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
+              className="w-10 h-10 flex items-center justify-center bg-bg-input border border-border rounded-lg hover:bg-bg-elevated hover:border-border-hover transition-all btn-press"
             >
-              <QrCode className="text-ink w-6 h-6" />
+              <QrCode className="w-4 h-4 text-text-secondary" />
             </button>
             <button
               onClick={() => setShowLeaderboard(true)}
-              className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
+              className="w-10 h-10 flex items-center justify-center bg-bg-input border border-border rounded-lg hover:bg-bg-elevated hover:border-border-hover transition-all btn-press"
               title="Leaderboard"
             >
-              <span className="text-xl">🔥</span>
+              <Trophy className="w-4 h-4 text-warm" />
             </button>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="w-12 h-12 flex items-center justify-center bg-white border-2 border-ink rounded-xl shadow-comic-sm btn-press"
-              title="Upload Class Context"
+              className="w-10 h-10 flex items-center justify-center bg-bg-input border border-border rounded-lg hover:bg-bg-elevated hover:border-border-hover transition-all btn-press"
+              title="Upload Context"
             >
-              <Paperclip className="text-ink w-6 h-6" />
+              <Paperclip className="w-4 h-4 text-text-secondary" />
             </button>
           </div>
         </div>
@@ -248,33 +242,39 @@ function TeacherSessionPage() {
           )}
         </AnimatePresence>
 
-        {/* GRID: Swapped — Actions left (col-8), Confusion right (col-4) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-          {/* Left: Actions (was right) */}
-          <div className="lg:col-span-8 flex flex-col gap-4">
+          {/* Left Column */}
+          <div className="lg:col-span-8 flex flex-col gap-5">
 
-            {/* Quiz Control Card */}
-            <div className="bg-coral/10 border-2 border-ink rounded-[2rem] p-8 shadow-comic relative overflow-hidden">
-              <div className="absolute -right-10 -bottom-10 opacity-10 transform rotate-12">
-                <HelpCircle className="w-64 h-64" />
+            {/* Quiz Card */}
+            <div className="card-glass p-7 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <div className="absolute -right-12 -bottom-12 opacity-5">
+                <HelpCircle className="w-56 h-56 text-primary" />
               </div>
 
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-3xl font-extrabold">Pop Quiz</h2>
-                  <div className="bg-white px-3 py-1 rounded-lg border-2 border-ink font-bold text-sm shadow-comic-sm">
-                    {activeQuiz ? "ACTIVE NOW" : "READY"}
+                <div className="flex items-center justify-between mb-7">
+                  <h2 className="text-xl font-display font-bold text-text-primary">Pop Quiz</h2>
+                  <div className={clsx(
+                    "px-3 py-1 rounded-full text-xs font-semibold border",
+                    activeQuiz
+                      ? "bg-lime/15 border-lime/20 text-lime"
+                      : "bg-bg-input border-border text-text-muted"
+                  )}>
+                    {activeQuiz ? "ACTIVE" : "READY"}
                   </div>
                 </div>
 
                 {activeQuiz ? (
-                  <div className="bg-white border-2 border-ink rounded-2xl p-6 shadow-comic-sm">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold text-lg">Live Results</h3>
+                  <div className="bg-bg-elevated border border-border rounded-xl p-5">
+                    <div className="flex justify-between items-center mb-5">
+                      <h3 className="font-semibold text-text-primary">Live Results</h3>
                       <button
                         onClick={() => closeQuiz({ sessionId: sessionId as Id<"sessions"> })}
-                        className="px-4 py-2 bg-ink text-white rounded-lg font-bold hover:bg-slate-800"
+                        className="px-4 py-2 bg-bg-input border border-border text-text-secondary rounded-lg font-semibold text-sm hover:bg-bg-card-hover hover:border-border-hover transition-all"
                       >
                         Close Quiz
                       </button>
@@ -282,16 +282,16 @@ function TeacherSessionPage() {
                     <QuizStatsPanel quizId={activeQuiz._id} />
                   </div>
                 ) : (
-                  <div className="flex flex-col items-start gap-6">
-                    <p className="font-medium text-ink/80 text-lg max-w-md">
-                      Generate a quick multiple-choice quiz based on the current lesson.
+                  <div className="flex flex-col items-start gap-5">
+                    <p className="text-text-muted text-sm max-w-md leading-relaxed">
+                      Generate a quick multiple-choice quiz from the current lesson using AI.
                     </p>
                     <button
                       onClick={handleLaunchQuiz}
                       disabled={isLaunchingQuiz}
-                      className="bg-white text-ink w-full md:w-auto px-8 py-4 rounded-xl border-2 border-ink font-extrabold text-xl shadow-comic flex items-center gap-3 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 btn-press"
+                      className="w-full md:w-auto inline-flex items-center justify-center gap-3 px-7 py-3.5 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-xl shadow-glow btn-press disabled:opacity-40"
                     >
-                      {isLaunchingQuiz ? <Loader2 className="animate-spin" /> : <Play className="fill-current" />}
+                      {isLaunchingQuiz ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
                       Launch Quiz
                     </button>
                   </div>
@@ -299,41 +299,41 @@ function TeacherSessionPage() {
               </div>
             </div>
 
-            {/* Live Transcription Card */}
-            <div className="bg-soft-purple/15 border-2 border-ink rounded-[2rem] p-6 shadow-comic">
+            {/* Transcription Card */}
+            <div className="card-glass p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-coral border-2 border-ink rounded-xl flex items-center justify-center">
-                  <Mic className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/20 flex items-center justify-center">
+                  <Mic className="w-5 h-5 text-accent-light" />
                 </div>
-                <h2 className="text-xl font-extrabold">Live Transcription</h2>
+                <h2 className="text-lg font-display font-bold text-text-primary">Live Transcription</h2>
               </div>
               <TranscriptionControls sessionId={sessionId as Id<"sessions">} />
             </div>
 
-            {/* Tools Grid */}
+            {/* Tools */}
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setShowQuestionSummary(true)}
-                className="bg-white border-2 border-ink rounded-2xl p-4 shadow-comic hover:shadow-none hover:translate-y-1 hover:translate-x-1 transition-all cursor-pointer group flex items-center gap-4 w-full text-left"
+                className="card-glass-hover p-4 flex items-center gap-4 text-left group"
               >
-                <div className="w-12 h-12 bg-mustard border-2 border-ink rounded-xl flex items-center justify-center group-hover:-rotate-6 transition-transform shrink-0">
-                  <MessageSquare className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-warm/15 border border-warm/20 flex items-center justify-center shrink-0 group-hover:shadow-glow-sm transition-shadow">
+                  <MessageSquare className="w-5 h-5 text-warm-light" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg leading-tight">Question Summary</h3>
-                  <p className="text-slate-500 text-sm">AI analysis of student questions</p>
+                  <h3 className="font-semibold text-text-primary text-sm">Question Summary</h3>
+                  <p className="text-text-muted text-xs">AI analysis</p>
                 </div>
               </button>
               <button
                 onClick={handleEndSession}
-                className="bg-white border-2 border-ink rounded-2xl p-4 shadow-comic hover:shadow-none hover:translate-y-1 hover:translate-x-1 transition-all cursor-pointer group flex items-center gap-4 w-full"
+                className="card-glass-hover p-4 flex items-center gap-4 text-left group"
               >
-                <div className="w-12 h-12 bg-white border-2 border-ink rounded-xl flex items-center justify-center group-hover:rotate-6 transition-transform shadow-sm shrink-0">
-                  <StopCircle className="w-6 h-6 text-red-500" />
+                <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/20 flex items-center justify-center shrink-0">
+                  <StopCircle className="w-5 h-5 text-accent" />
                 </div>
-                <div className="text-left">
-                  <h3 className="font-bold text-lg text-red-600 leading-tight">End Class</h3>
-                  <p className="text-red-400/80 text-sm font-medium">Close session</p>
+                <div>
+                  <h3 className="font-semibold text-accent text-sm">End Class</h3>
+                  <p className="text-text-muted text-xs">Close session</p>
                 </div>
               </button>
             </div>
@@ -341,62 +341,38 @@ function TeacherSessionPage() {
             <StudentQuestionFeed sessionId={sessionId as Id<"sessions">} />
           </div>
 
-          {/* Right: Confusion Meter (was left) */}
-          <div className="lg:col-span-4 flex flex-col gap-4 self-start lg:sticky lg:top-6">
-            <div className="bg-milk border-2 border-ink rounded-[2rem] p-6 shadow-comic flex flex-col items-center text-center relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-4 bg-mustard border-b-2 border-ink" />
+          {/* Right Column - just the student count summary now */}
+          <div className="lg:col-span-4 flex flex-col gap-5 self-start lg:sticky lg:top-6">
+            <div className="card-glass p-6 flex flex-col items-center text-center relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-secondary/50 to-transparent" />
 
-              <h2 className="text-xl font-extrabold mt-2 mb-1">Room Vibe</h2>
-              <p className="text-slate-500 font-bold text-sm uppercase tracking-wide opacity-70">Confusion Level</p>
+              <h2 className="text-base font-display font-bold text-text-primary mt-1 mb-1">Session Info</h2>
+              <p className="text-text-muted text-xs mb-5">Real-time overview</p>
 
-              <div className="flex flex-col items-center justify-center relative w-full py-6">
-                {/* Background Circles */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="w-48 h-48 bg-coral rounded-full blur-3xl"
-                  />
+              <div className="w-full space-y-3">
+                <div className="flex items-center justify-between px-4 py-3 bg-bg-elevated rounded-xl border border-border">
+                  <span className="text-text-muted text-sm">Students</span>
+                  <span className="font-display font-bold text-2xl text-text-primary tabular-nums">{studentCount ?? 0}</span>
                 </div>
-
-                <motion.div
-                  animate={{
-                    scale: 1 + (lostStudentCount || 0) * 0.1,
-                    rotate: (lostStudentCount || 0) * 5
-                  }}
-                  className={clsx(
-                    "w-32 h-32 border-4 border-ink rounded-full flex items-center justify-center relative z-10 transition-colors duration-500 shadow-comic",
-                    (lostStudentCount || 0) > 3 ? "bg-red-400" : (lostStudentCount || 0) > 0 ? "bg-mustard" : "bg-white"
-                  )}
-                >
-                  {/* Face Expression */}
-                  {(lostStudentCount || 0) > 3 ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex gap-4"><div className="w-3 h-3 rounded-full bg-ink" /><div className="w-3 h-3 rounded-full bg-ink" /></div>
-                      <div className="w-8 h-3 bg-ink rounded-full" />
-                    </div>
-                  ) : (lostStudentCount || 0) > 0 ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-ink" /><div className="w-3 h-3 rounded-full bg-ink" /></div>
-                      <div className="w-6 h-1 bg-ink" />
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex gap-4"><div className="w-3 h-6 bg-ink rounded-full" /><div className="w-3 h-6 bg-ink rounded-full" /></div>
-                      <div className="w-8 h-4 border-b-4 border-ink rounded-b-full" />
-                    </div>
-                  )}
-                </motion.div>
-
-                <div className="mt-4 flex gap-2 items-end">
-                  <span className="text-4xl font-extrabold tabular-nums leading-none">
-                    {lostStudentCount ?? 0}
-                  </span>
-                  <span className="font-bold text-slate-500 mb-1">confused</span>
+                <div className="flex items-center justify-between px-4 py-3 bg-bg-elevated rounded-xl border border-border">
+                  <span className="text-text-muted text-sm">Join Code</span>
+                  <button onClick={handleCopyCode} className="flex items-center gap-2 group">
+                    <span className="font-mono font-semibold text-primary-light tracking-wider">{session.code}</span>
+                    {copied
+                      ? <Check className="w-3.5 h-3.5 text-lime" />
+                      : <Copy className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors" />
+                    }
+                  </button>
+                </div>
+                <div className="flex items-center justify-between px-4 py-3 bg-bg-elevated rounded-xl border border-border">
+                  <span className="text-text-muted text-sm">Status</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-lime animate-pulse" />
+                    <span className="text-sm font-semibold text-lime">Live</span>
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -407,50 +383,42 @@ function TeacherSessionPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowQrModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white border-4 border-ink p-8 rounded-[2.5rem] shadow-comic max-w-sm w-full text-center relative"
+              className="card-glass p-8 max-w-sm w-full text-center relative"
             >
               <button
                 onClick={() => setShowQrModal(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors border-2 border-transparent hover:border-ink"
+                className="absolute top-4 right-4 p-2 hover:bg-bg-elevated rounded-lg transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 text-text-muted" />
               </button>
 
-              <h3 className="text-2xl font-extrabold mb-2">Join Class</h3>
-              <p className="text-slate-500 font-bold mb-6">Scan to join immediately</p>
+              <h3 className="text-xl font-display font-bold text-text-primary mb-2">Join Class</h3>
+              <p className="text-text-muted text-sm mb-6">Scan to join</p>
 
-              <div className="bg-white p-4 rounded-xl border-2 border-ink inline-block mb-6 shadow-sm">
+              <div className="bg-white p-4 rounded-xl inline-block mb-6">
                 <div style={{ height: "auto", margin: "0 auto", maxWidth: 200, width: "100%" }}>
                   {qrDataUrl ? (
-                    <img
-                      src={qrDataUrl}
-                      alt="Join Code QR"
-                      className="w-full h-auto"
-                    />
+                    <img src={qrDataUrl} alt="Join Code QR" className="w-full h-auto" />
                   ) : (
                     <div className="w-full h-48 flex items-center justify-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                      <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 justify-center bg-milk p-3 rounded-xl border-2 border-ink border-dashed">
-                <span className="font-mono font-bold text-xl tracking-widest">{session.code}</span>
-                <button
-                  onClick={handleCopyCode}
-                  className="p-2 hover:bg-white rounded-lg transition-colors border-2 border-transparent hover:border-ink"
-                  title="Copy Code"
-                >
-                  {copied ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
+              <div className="flex items-center gap-2 justify-center bg-bg-elevated p-3 rounded-xl border border-border">
+                <span className="font-mono font-semibold text-lg text-primary-light tracking-widest">{session.code}</span>
+                <button onClick={handleCopyCode} className="p-1.5 hover:bg-bg-card rounded-lg transition-colors" title="Copy Code">
+                  {copied ? <Check className="w-4 h-4 text-lime" /> : <Copy className="w-4 h-4 text-text-muted" />}
                 </button>
               </div>
             </motion.div>
@@ -462,52 +430,46 @@ function TeacherSessionPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowEndSessionModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20, rotate: -2 }}
-              animate={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white border-4 border-ink p-8 rounded-[2.5rem] shadow-comic max-w-md w-full text-center relative overflow-hidden"
+              className="card-glass p-8 max-w-md w-full text-center relative overflow-hidden"
             >
-              <div className="absolute top-0 inset-x-0 h-4 bg-red-400 border-b-4 border-ink" />
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent" />
 
-              <div className="w-20 h-20 bg-red-100 rounded-full border-4 border-ink flex items-center justify-center mx-auto mb-6 relative">
-                <StopCircle className="w-10 h-10 text-red-500" />
-                <div className="absolute -right-2 -top-2 bg-ink text-white text-xs font-extrabold px-2 py-1 rounded-lg transform rotate-12">
-                  HOLD ON!
-                </div>
+              <div className="w-16 h-16 rounded-2xl bg-accent/15 border border-accent/20 flex items-center justify-center mx-auto mb-6">
+                <StopCircle className="w-8 h-8 text-accent" />
               </div>
 
-              <h3 className="text-3xl font-extrabold mb-4 text-ink">Wrap it up?</h3>
-              <p className="text-slate-500 font-bold mb-8 text-lg leading-relaxed">
-                Are you sure you want to end this session? <br />
-                <span className="text-red-500">All students will be disconnected.</span>
+              <h3 className="text-2xl font-display font-bold text-text-primary mb-3">End Session?</h3>
+              <p className="text-text-muted mb-8 leading-relaxed">
+                All students will be disconnected from the session.
               </p>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setShowEndSessionModal(false)}
-                  className="flex-1 py-4 px-6 rounded-xl border-2 border-slate-200 font-bold text-slate-500 hover:border-ink hover:text-ink hover:bg-slate-50 transition-all text-lg"
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-bg-input border border-border font-semibold text-text-secondary hover:bg-bg-elevated hover:border-border-hover transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmEndSession}
-                  className="flex-1 py-4 px-6 rounded-xl border-2 border-ink bg-red-500 text-white font-extrabold shadow-comic-sm hover:translate-y-0.5 hover:shadow-none transition-all flex items-center justify-center gap-2 text-lg group"
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-accent text-white font-semibold shadow-glow-accent btn-press flex items-center justify-center gap-2 hover:opacity-90"
                 >
-                  <span>End It</span>
-                  <div className="bg-white/20 p-1 rounded-full group-hover:rotate-90 transition-transform">
-                    <X className="w-4 h-4" />
-                  </div>
+                  End It
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-
             </motion.div>
           </motion.div>
         )}
+
         {showUploadModal && (
           <UploadContextModal
             onClose={() => setShowUploadModal(false)}
@@ -523,30 +485,30 @@ function TeacherSessionPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowQuestionSummary(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white border-4 border-ink p-8 rounded-[2.5rem] shadow-comic max-w-lg w-full relative"
+              className="card-glass p-7 max-w-lg w-full relative"
             >
               <button
                 onClick={() => setShowQuestionSummary(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors border-2 border-transparent hover:border-ink"
+                className="absolute top-4 right-4 p-2 hover:bg-bg-elevated rounded-lg transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 text-text-muted" />
               </button>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-coral border-2 border-ink rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-primary-light" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-extrabold">Question Summary</h3>
-                  <p className="text-slate-500 font-medium">AI analysis of student confusion</p>
+                  <h3 className="text-lg font-display font-bold text-text-primary">Question Summary</h3>
+                  <p className="text-text-muted text-xs">AI analysis of student questions</p>
                 </div>
               </div>
 
@@ -561,7 +523,7 @@ function TeacherSessionPage() {
 
 const MAX_CONTEXT_CHARS = 200000;
 const SUPPORTED_EXTENSIONS = [".pdf", ".docx", ".pptx", ".txt", ".md"];
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 interface ParseResult {
   text: string;
@@ -594,7 +556,6 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
   const parseUploadedFile = useAction(api.fileParser.parseUploadedFile);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Compute the combined text based on active tab
   const combinedText = activeTab === 'paste'
     ? pasteText
     : formatParsedContent(uploadedFiles.filter(f => f.result).map(f => f.result!));
@@ -611,95 +572,40 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
   };
 
   const validateFile = (file: File): string | null => {
-    if (file.size > MAX_FILE_SIZE) {
-      return `File exceeds 50MB limit`;
-    }
+    if (file.size > MAX_FILE_SIZE) return `File exceeds 50MB limit`;
     const extension = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
-    if (!SUPPORTED_EXTENSIONS.includes(extension)) {
-      return `Unsupported file type "${extension}"`;
-    }
+    if (!SUPPORTED_EXTENSIONS.includes(extension)) return `Unsupported file type "${extension}"`;
     return null;
   };
 
   const processFiles = async (files: File[]) => {
-    // Add files to state with pending status
-    const newUploadedFiles: UploadedFile[] = files.map(file => ({
-      file,
-      status: 'pending' as const
-    }));
-
+    const newUploadedFiles: UploadedFile[] = files.map(file => ({ file, status: 'pending' as const }));
     setUploadedFiles(prev => [...prev, ...newUploadedFiles]);
 
-    // Process each file
     for (const file of files) {
-      // Validate before processing
       const validationError = validateFile(file);
       if (validationError) {
-        setUploadedFiles(prev =>
-          prev.map(uf =>
-            uf.file === file
-              ? { ...uf, status: 'error' as const, result: { text: '', fileName: file.name, error: validationError } }
-              : uf
-          )
-        );
+        setUploadedFiles(prev => prev.map(uf =>
+          uf.file === file ? { ...uf, status: 'error' as const, result: { text: '', fileName: file.name, error: validationError } } : uf
+        ));
         continue;
       }
-
       try {
-        // Set status to uploading
-        setUploadedFiles(prev =>
-          prev.map(uf =>
-            uf.file === file ? { ...uf, status: 'uploading' as const } : uf
-          )
-        );
-
-        // Upload to Convex storage
+        setUploadedFiles(prev => prev.map(uf => uf.file === file ? { ...uf, status: 'uploading' as const } : uf));
         const uploadUrl = await generateUploadUrl();
-        const uploadResponse = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error("Failed to upload file");
-        }
-
+        const uploadResponse = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": file.type }, body: file });
+        if (!uploadResponse.ok) throw new Error("Failed to upload file");
         const { storageId } = await uploadResponse.json();
-
-        // Set status to parsing
-        setUploadedFiles(prev =>
-          prev.map(uf =>
-            uf.file === file ? { ...uf, status: 'parsing' as const } : uf
-          )
-        );
-
-        // Parse the file on the server
-        const result = await parseUploadedFile({
-          storageId,
-          fileName: file.name,
-        });
-
-        setUploadedFiles(prev =>
-          prev.map(uf =>
-            uf.file === file
-              ? {
-                ...uf,
-                status: result.error ? 'error' : 'done',
-                result: { text: result.text, fileName: file.name, error: result.error }
-              }
-              : uf
-          )
-        );
+        setUploadedFiles(prev => prev.map(uf => uf.file === file ? { ...uf, status: 'parsing' as const } : uf));
+        const result = await parseUploadedFile({ storageId, fileName: file.name });
+        setUploadedFiles(prev => prev.map(uf =>
+          uf.file === file ? { ...uf, status: result.error ? 'error' : 'done', result: { text: result.text, fileName: file.name, error: result.error } } : uf
+        ));
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
-        setUploadedFiles(prev =>
-          prev.map(uf =>
-            uf.file === file
-              ? { ...uf, status: 'error' as const, result: { text: '', fileName: file.name, error: message } }
-              : uf
-          )
-        );
+        setUploadedFiles(prev => prev.map(uf =>
+          uf.file === file ? { ...uf, status: 'error' as const, result: { text: '', fileName: file.name, error: message } } : uf
+        ));
       }
     }
   };
@@ -708,17 +614,12 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      processFiles(files);
-    }
+    if (files.length > 0) processFiles(files);
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      processFiles(files);
-    }
-    // Reset input so the same file can be selected again
+    if (files.length > 0) processFiles(files);
     e.target.value = '';
   };
 
@@ -734,133 +635,91 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border-4 border-ink p-6 rounded-[2.5rem] shadow-comic max-w-2xl w-full relative flex flex-col max-h-[85vh]"
+        className="card-glass p-6 max-w-2xl w-full relative flex flex-col max-h-[85vh]"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors border-2 border-transparent hover:border-ink"
-        >
-          <X className="w-6 h-6" />
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-bg-elevated rounded-lg transition-colors">
+          <X className="w-5 h-5 text-text-muted" />
         </button>
 
-        <h3 className="text-2xl font-extrabold mb-1">Class Context</h3>
-        <p className="text-slate-500 font-bold mb-4">Upload lecture materials or paste text to help AI understand your class.</p>
+        <h3 className="text-lg font-display font-bold text-text-primary mb-1">Class Context</h3>
+        <p className="text-text-muted text-sm mb-5">Upload materials to help AI understand your class.</p>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => setActiveTab('upload')}
             className={clsx(
-              "flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2",
+              "flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2",
               activeTab === 'upload'
-                ? "bg-coral text-white border-2 border-ink shadow-comic-sm"
-                : "bg-slate-100 text-slate-600 border-2 border-transparent hover:border-slate-200"
+                ? "bg-primary/15 text-primary-light border border-primary/25"
+                : "bg-bg-input text-text-muted border border-border hover:border-border-hover"
             )}
           >
-            <Upload className="w-4 h-4" />
-            Upload Files
+            <Upload className="w-3.5 h-3.5" /> Upload Files
           </button>
           <button
             onClick={() => setActiveTab('paste')}
             className={clsx(
-              "flex-1 py-2.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2",
+              "flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2",
               activeTab === 'paste'
-                ? "bg-coral text-white border-2 border-ink shadow-comic-sm"
-                : "bg-slate-100 text-slate-600 border-2 border-transparent hover:border-slate-200"
+                ? "bg-primary/15 text-primary-light border border-primary/25"
+                : "bg-bg-input text-text-muted border border-border hover:border-border-hover"
             )}
           >
-            <FileText className="w-4 h-4" />
-            Paste Text
+            <FileText className="w-3.5 h-3.5" /> Paste Text
           </button>
         </div>
 
-        {/* Tab Content */}
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           {activeTab === 'upload' ? (
             <>
-              {/* Drop Zone */}
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 className={clsx(
-                  "border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer mb-4",
-                  isDragging
-                    ? "border-coral bg-coral/5"
-                    : "border-slate-300 hover:border-coral hover:bg-slate-50"
+                  "border border-dashed rounded-xl p-6 text-center transition-all cursor-pointer mb-4",
+                  isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/30 hover:bg-bg-elevated"
                 )}
                 onClick={() => document.getElementById('file-input')?.click()}
               >
-                <input
-                  id="file-input"
-                  type="file"
-                  multiple
-                  accept={SUPPORTED_EXTENSIONS.join(",")}
-                  onChange={handleFileInput}
-                  className="hidden"
-                />
-                <Upload className={clsx(
-                  "w-10 h-10 mx-auto mb-2 transition-colors",
-                  isDragging ? "text-coral" : "text-slate-400"
-                )} />
-                <p className="font-bold text-slate-700 mb-1">
-                  Drop files here or click to browse
-                </p>
-                <p className="text-sm text-slate-500">
-                  PDF, DOCX, PPTX, TXT, MD (max 10MB each)
-                </p>
+                <input id="file-input" type="file" multiple accept={SUPPORTED_EXTENSIONS.join(",")} onChange={handleFileInput} className="hidden" />
+                <Upload className={clsx("w-8 h-8 mx-auto mb-2 transition-colors", isDragging ? "text-primary" : "text-text-muted")} />
+                <p className="font-semibold text-text-secondary text-sm mb-1">Drop files here or click to browse</p>
+                <p className="text-xs text-text-muted">PDF, DOCX, PPTX, TXT, MD (max 50MB each)</p>
               </div>
 
-              {/* File List */}
               {uploadedFiles.length > 0 && (
                 <div className="mb-4">
-                  <p className="font-bold text-sm text-slate-600 mb-2">Files:</p>
+                  <p className="font-semibold text-xs text-text-secondary mb-2 uppercase tracking-wider">Files</p>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {uploadedFiles.map((uf, i) => (
-                      <div
-                        key={i}
-                        className={clsx(
-                          "flex items-center gap-2 p-2 rounded-lg border-2",
-                          uf.status === 'error'
-                            ? "border-red-200 bg-red-50"
-                            : uf.status === 'done'
-                              ? "border-green-200 bg-green-50"
-                              : "border-slate-200 bg-slate-50"
-                        )}
-                      >
+                      <div key={i} className={clsx(
+                        "flex items-center gap-2 p-2.5 rounded-lg border",
+                        uf.status === 'error' ? "border-accent/30 bg-accent/5" : uf.status === 'done' ? "border-lime/30 bg-lime/5" : "border-border bg-bg-elevated"
+                      )}>
                         {uf.status === 'pending' || uf.status === 'uploading' || uf.status === 'parsing' ? (
-                          <Loader2 className="w-4 h-4 text-coral animate-spin shrink-0" />
+                          <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
                         ) : uf.status === 'error' ? (
-                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                          <AlertCircle className="w-3.5 h-3.5 text-accent shrink-0" />
                         ) : (
-                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-lime shrink-0" />
                         )}
-                        <span className="font-medium text-sm flex-1 truncate">
-                          {uf.file.name}
-                        </span>
+                        <span className="font-medium text-xs flex-1 truncate text-text-secondary">{uf.file.name}</span>
                         {(uf.status === 'uploading' || uf.status === 'parsing') && (
-                          <span className="text-xs text-slate-500">
-                            {uf.status === 'uploading' ? 'Uploading...' : 'Parsing...'}
-                          </span>
+                          <span className="text-[10px] text-text-muted">{uf.status === 'uploading' ? 'Uploading...' : 'Parsing...'}</span>
                         )}
-                        {uf.result?.error && (
-                          <span className="text-xs text-red-600 truncate max-w-48" title={uf.result.error}>
-                            {uf.result.error}
-                          </span>
-                        )}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); removeFile(uf.file); }}
-                          className="p-1 hover:bg-slate-200 rounded transition-colors shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4 text-slate-500" />
+                        {uf.result?.error && <span className="text-[10px] text-accent truncate max-w-48" title={uf.result.error}>{uf.result.error}</span>}
+                        <button onClick={(e) => { e.stopPropagation(); removeFile(uf.file); }} className="p-1 hover:bg-bg-card rounded transition-colors shrink-0">
+                          <Trash2 className="w-3.5 h-3.5 text-text-muted" />
                         </button>
                       </div>
                     ))}
@@ -868,16 +727,13 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
                 </div>
               )}
 
-              {/* Preview */}
               {combinedText && (
                 <div className="flex-1 min-h-0 flex flex-col">
-                  <p className="font-bold text-sm text-slate-600 mb-2">Preview:</p>
-                  <div className="flex-1 border-2 border-slate-200 rounded-xl p-3 overflow-y-auto bg-slate-50 min-h-[120px]">
-                    <pre className="text-sm text-slate-700 whitespace-pre-wrap font-sans">
+                  <p className="font-semibold text-xs text-text-secondary mb-2 uppercase tracking-wider">Preview</p>
+                  <div className="flex-1 border border-border rounded-xl p-3 overflow-y-auto bg-bg-elevated min-h-[100px]">
+                    <pre className="text-xs text-text-muted whitespace-pre-wrap font-sans">
                       {combinedText.slice(0, 2000)}
-                      {combinedText.length > 2000 && (
-                        <span className="text-slate-400">... (truncated preview)</span>
-                      )}
+                      {combinedText.length > 2000 && <span className="text-text-muted/50">... (truncated)</span>}
                     </pre>
                   </div>
                 </div>
@@ -888,32 +744,27 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               placeholder="Paste lecture notes, slide text, or summaries here..."
-              className="flex-1 w-full border-2 border-ink rounded-xl p-4 font-medium resize-none overflow-y-auto focus:ring-2 focus:ring-coral focus:outline-none min-h-[200px]"
+              className="flex-1 w-full bg-bg-input border border-border rounded-xl p-4 font-medium text-sm text-text-primary placeholder-text-muted resize-none overflow-y-auto focus:border-primary/50 focus:shadow-glow-sm outline-none transition-all min-h-[200px]"
             />
           )}
         </div>
 
-        {/* Character Counter */}
         <div className={clsx(
-          "text-right text-sm font-bold mt-3 mb-4",
-          isOverLimit ? "text-red-500" : charCount > MAX_CONTEXT_CHARS * 0.9 ? "text-amber-500" : "text-slate-400"
+          "text-right text-xs font-medium mt-3 mb-4",
+          isOverLimit ? "text-accent" : charCount > MAX_CONTEXT_CHARS * 0.9 ? "text-warm" : "text-text-muted"
         )}>
           {charCount.toLocaleString()} / {MAX_CONTEXT_CHARS.toLocaleString()} characters
-          {isOverLimit && <span className="block text-xs">Content exceeds limit</span>}
+          {isOverLimit && <span className="block text-[10px]">Content exceeds limit</span>}
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 rounded-xl border-2 border-slate-200 font-bold text-slate-500 hover:border-ink hover:text-ink hover:bg-slate-50 transition-all"
-          >
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl bg-bg-input border border-border font-semibold text-sm text-text-muted hover:bg-bg-elevated hover:border-border-hover transition-all">
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving || isOverLimit || !hasContent}
-            className="px-6 py-3 rounded-xl border-2 border-ink bg-coral text-white font-bold shadow-comic-sm hover:translate-y-0.5 hover:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-glow-sm btn-press disabled:opacity-40"
           >
             {isSaving ? "Saving..." : "Save Context"}
           </button>
@@ -926,20 +777,20 @@ function UploadContextModal({ onClose, sessionId, initialContext }: { onClose: (
 function QuizStatsPanel({ quizId }: { quizId: Id<"quizzes"> }) {
   const stats = useQuery(api.quizzes.getQuizStats, { quizId });
 
-  if (!stats) return <div className="text-center py-8 font-bold text-slate-400 animate-pulse">Waiting for responses...</div>;
+  if (!stats) return <div className="text-center py-8 text-text-muted text-sm animate-pulse">Waiting for responses...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <div className="text-5xl font-extrabold">{stats.totalResponses}</div>
-        <div className="text-sm font-bold text-slate-500 leading-tight">Student<br />Responses</div>
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="text-4xl font-display font-bold text-text-primary">{stats.totalResponses}</div>
+        <div className="text-xs text-text-muted leading-tight">Student<br />Responses</div>
       </div>
 
-      <div className="space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+      <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
         {stats.questions.map((q: any, i: number) => (
           <div key={i} className="pb-2">
-            <p className="font-bold mb-4 text-lg">{i + 1}. {q.prompt}</p>
-            <div className="flex gap-3 w-full">
+            <p className="font-semibold text-text-primary mb-3 text-sm">{i + 1}. {q.prompt}</p>
+            <div className="flex gap-2.5 w-full">
               {stats.choiceDistributions[i].map((count: number, j: number) => {
                 const isCorrect = j === q.correctIndex;
                 const percent = stats.totalResponses > 0 ? Math.round((count / stats.totalResponses) * 100) : 0;
@@ -948,36 +799,30 @@ function QuizStatsPanel({ quizId }: { quizId: Id<"quizzes"> }) {
                   <div
                     key={j}
                     className={clsx(
-                      "flex-1 min-w-0 relative h-16 rounded-xl border-2 overflow-hidden group transition-all",
-                      isCorrect ? "border-green-500 bg-green-50/50" : "border-slate-200 bg-slate-50"
+                      "flex-1 min-w-0 relative h-14 rounded-xl border overflow-hidden transition-all",
+                      isCorrect ? "border-lime/30 bg-lime/5" : "border-border bg-bg-elevated"
                     )}
                   >
-                    {/* Vertical Bar Background */}
                     <motion.div
                       initial={{ height: 0 }}
                       animate={{ height: `${percent}%` }}
                       transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-                      className={clsx(
-                        "absolute bottom-0 inset-x-0 opacity-20 transition-all",
-                        isCorrect ? "bg-green-500" : "bg-slate-400"
-                      )}
+                      className={clsx("absolute bottom-0 inset-x-0 opacity-20", isCorrect ? "bg-lime" : "bg-text-muted")}
                     />
-
-                    {/* Content */}
-                    <div className="relative z-10 w-full h-full flex items-center justify-center gap-3">
+                    <div className="relative z-10 w-full h-full flex items-center justify-center gap-2">
                       <span className={clsx(
-                        "font-extrabold text-lg px-2.5 py-0.5 rounded-lg border-2",
-                        isCorrect ? "bg-green-100 border-green-200 text-green-800" : "bg-white border-slate-200 text-slate-600"
+                        "font-bold text-sm px-2 py-0.5 rounded-md",
+                        isCorrect ? "text-lime" : "text-text-muted"
                       )}>
                         {String.fromCharCode(65 + j)}
-                        {isCorrect && <Check className="w-3.5 h-3.5 inline ml-1" />}
+                        {isCorrect && <Check className="w-3 h-3 inline ml-0.5" />}
                       </span>
-                      <span className={clsx("text-2xl font-extrabold", isCorrect ? "text-green-900" : "text-slate-700")}>
+                      <span className={clsx("text-xl font-bold", isCorrect ? "text-text-primary" : "text-text-secondary")}>
                         {count}
                       </span>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -1002,10 +847,7 @@ function QuestionSummaryPanel({ sessionId }: { sessionId: Id<"sessions"> }) {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await getQuestionSummaryAction({
-        sessionId,
-        timeWindowMinutes: 30,
-      });
+      const result = await getQuestionSummaryAction({ sessionId, timeWindowMinutes: 30 });
       setSummary(result);
     } catch (err) {
       console.error("Failed to generate question summary:", err);
@@ -1014,7 +856,6 @@ function QuestionSummaryPanel({ sessionId }: { sessionId: Id<"sessions"> }) {
     setIsLoading(false);
   };
 
-  // Auto-generate on mount
   useEffect(() => {
     generateSummary();
   }, []);
@@ -1022,55 +863,50 @@ function QuestionSummaryPanel({ sessionId }: { sessionId: Id<"sessions"> }) {
   return (
     <div className="space-y-4">
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-coral" />
-          <span className="ml-3 font-bold text-slate-500">Analyzing questions...</span>
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <span className="ml-3 text-text-muted text-sm">Analyzing questions...</span>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-center">
-          <p className="text-red-600 font-bold">{error}</p>
-          <button
-            onClick={generateSummary}
-            className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600"
-          >
+        <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 text-center">
+          <p className="text-accent text-sm font-medium">{error}</p>
+          <button onClick={generateSummary} className="mt-3 px-4 py-2 bg-accent text-white rounded-lg font-semibold text-sm hover:opacity-90">
             Try Again
           </button>
         </div>
       ) : summary ? (
         <>
-          <div className="bg-coral/10 border-2 border-coral/20 rounded-xl p-4">
-            <p className="text-ink font-medium">{summary.summary}</p>
+          <div className="bg-primary/10 border border-primary/15 rounded-xl p-4">
+            <p className="text-text-secondary text-sm">{summary.summary}</p>
           </div>
 
           {summary.themes.length > 0 ? (
-            <div className="space-y-3">
-              <h4 className="font-bold text-slate-600">Common Confusion Points:</h4>
+            <div className="space-y-2.5">
+              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Common Themes</h4>
               {summary.themes.map((theme, i) => (
-                <div key={i} className="bg-milk border-2 border-ink rounded-xl p-4">
+                <div key={i} className="bg-bg-elevated border border-border rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-lg">{theme.theme}</span>
-                    <span className="bg-mustard/20 px-2 py-1 rounded-lg text-sm font-bold">
+                    <span className="font-semibold text-text-primary text-sm">{theme.theme}</span>
+                    <span className="bg-warm/15 text-warm-light px-2 py-0.5 rounded-md text-xs font-semibold">
                       {theme.questionCount} questions
                     </span>
                   </div>
-                  <p className="text-slate-600 text-sm">{theme.suggestedAction}</p>
+                  <p className="text-text-muted text-xs">{theme.suggestedAction}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 text-center">
-              <MessageSquare className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 font-medium">
-                No questions yet! As students ask questions, AI will analyze patterns and show you where they're confused.
-              </p>
+            <div className="bg-bg-elevated border border-dashed border-border rounded-xl p-6 text-center">
+              <MessageSquare className="w-8 h-8 text-text-muted/30 mx-auto mb-3" />
+              <p className="text-text-muted text-sm">No questions yet. Patterns will appear as students ask questions.</p>
             </div>
           )}
 
           <button
             onClick={generateSummary}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-ink text-white rounded-xl font-bold hover:bg-slate-800 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-bg-input border border-border text-text-secondary rounded-xl font-semibold text-sm hover:bg-bg-elevated hover:border-border-hover transition-all"
           >
-            <RefreshCw className="w-5 h-5" />
+            <RefreshCw className="w-4 h-4" />
             Refresh Analysis
           </button>
         </>

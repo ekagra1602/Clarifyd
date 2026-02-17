@@ -19,7 +19,7 @@ export function AvatarPreview({ avatar, size = "md" }: { avatar: AvatarInput; si
       <img
         src={src}
         alt="Avatar"
-        className={`${sizeClass} rounded-2xl border-2 border-ink shadow-comic-sm object-cover bg-slate-100`}
+        className={`${sizeClass} rounded-xl border border-border object-cover bg-bg-elevated`}
       />
     </div>
   );

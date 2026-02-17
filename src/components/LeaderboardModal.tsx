@@ -3,6 +3,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { motion } from "framer-motion";
 import clsx from "clsx";
+import { X, Trophy } from "lucide-react";
 
 type LeaderboardEntry = {
   rank: number;
@@ -35,7 +36,7 @@ export function LeaderboardModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-ink/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -43,34 +44,31 @@ export function LeaderboardModal({
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border-2 border-ink rounded-2xl shadow-comic max-w-md w-full max-h-[85vh] overflow-hidden flex flex-col"
+        className="card-glass max-w-md w-full max-h-[85vh] overflow-hidden flex flex-col"
       >
-        <div className="p-4 border-b-2 border-ink bg-mustard/20 flex items-center justify-between">
-          <h2 className="text-xl font-black text-ink">Leaderboard</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-black/5 rounded-full transition-colors group"
-          >
-            <div className="w-5 h-5 relative flex items-center justify-center">
-              <div className="absolute w-full h-0.5 bg-ink rotate-45 group-hover:bg-coral transition-colors" />
-              <div className="absolute w-full h-0.5 bg-ink -rotate-45 group-hover:bg-coral transition-colors" />
-            </div>
+        <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
+          <h2 className="text-lg font-display font-bold text-text-primary flex items-center gap-2.5">
+            <Trophy className="w-5 h-5 text-warm" />
+            Leaderboard
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-bg-elevated rounded-lg transition-colors">
+            <X className="w-4 h-4 text-text-muted" />
           </button>
         </div>
-        <div className="overflow-y-auto p-4 custom-scrollbar">
+        <div className="overflow-y-auto p-4">
           {!leaderboard ? (
-            <div className="py-8 text-center text-slate-500 font-bold">Loading...</div>
+            <div className="py-8 text-center text-text-muted text-sm">Loading...</div>
           ) : leaderboard.length === 0 ? (
-            <div className="py-8 text-center text-slate-500 font-bold">No students yet.</div>
+            <div className="py-8 text-center text-text-muted text-sm">No students yet.</div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-ink">
-                  <th className="pb-2 pr-2 font-black text-ink text-sm">#</th>
-                  <th className="pb-2 pr-2 font-black text-ink text-sm">Name</th>
-                  <th className="pb-2 pr-2 font-black text-ink text-sm text-center">Streak</th>
-                  <th className="pb-2 pr-2 font-black text-ink text-sm text-center">Correct</th>
-                  <th className="pb-2 font-black text-ink text-sm text-right">Score</th>
+                <tr className="border-b border-border">
+                  <th className="pb-2.5 pr-2 font-semibold text-text-muted text-xs">#</th>
+                  <th className="pb-2.5 pr-2 font-semibold text-text-muted text-xs">Name</th>
+                  <th className="pb-2.5 pr-2 font-semibold text-text-muted text-xs text-center">Streak</th>
+                  <th className="pb-2.5 pr-2 font-semibold text-text-muted text-xs text-center">Correct</th>
+                  <th className="pb-2.5 font-semibold text-text-muted text-xs text-right">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -78,29 +76,29 @@ export function LeaderboardModal({
                   <tr
                     key={row.studentId}
                     className={clsx(
-                      "border-b border-slate-200",
-                      row.studentId === currentStudentId && "bg-coral/10 border-coral/30"
+                      "border-b border-border/50",
+                      row.studentId === currentStudentId && "bg-primary/5"
                     )}
                   >
-                    <td className="py-2.5 pr-2 font-bold text-ink">{row.rank}</td>
-                    <td className="py-2.5 pr-2 font-medium text-ink">
+                    <td className="py-2.5 pr-2 font-semibold text-text-secondary text-sm">{row.rank}</td>
+                    <td className="py-2.5 pr-2 font-medium text-text-primary text-sm">
                       {displayName(row.studentId)}
                       {row.studentId === currentStudentId && (
-                        <span className="ml-1 text-xs font-bold text-coral">(you)</span>
+                        <span className="ml-1 text-[10px] font-semibold text-primary-light">(you)</span>
                       )}
                     </td>
                     <td className="py-2.5 pr-2 text-center">
-                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-mustard/30 border border-ink/20 font-bold text-sm">
-                        🔥 {row.currentStreak}
+                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-warm/15 border border-warm/20 font-semibold text-xs text-warm-light">
+                        {row.currentStreak}
                       </span>
                     </td>
-                    <td className="py-2.5 pr-2 text-center font-medium text-ink">
+                    <td className="py-2.5 pr-2 text-center font-medium text-text-secondary text-sm">
                       {row.totalCorrect}
                       {row.totalAnswered > 0 && (
-                        <span className="text-slate-500 text-xs ml-0.5">/ {row.totalAnswered}</span>
+                        <span className="text-text-muted text-[10px] ml-0.5">/ {row.totalAnswered}</span>
                       )}
                     </td>
-                    <td className="py-2.5 font-bold text-ink text-right">{row.score}</td>
+                    <td className="py-2.5 font-bold text-text-primary text-sm text-right">{row.score}</td>
                   </tr>
                 ))}
               </tbody>

@@ -15,8 +15,7 @@ function TeacherIndexPage() {
     const [roomName, setRoomName] = useState("");
     const [instructorName, setInstructorName] = useState("");
 
-    // DiceBear avatar state
-    const [avatar, setAvatar] = useState({
+    const [avatar, setAvatar] = useState<{ style: string; seed: string }>({
         style: DEFAULT_AVATAR.style,
         seed: `teacher-${Date.now()}`,
     });
@@ -58,45 +57,45 @@ function TeacherIndexPage() {
     const currentStyleLabel = DICEBEAR_STYLES.find((s) => s.id === avatar.style)?.label ?? avatar.style;
 
     return (
-        <div className="min-h-screen bg-lavender-bg py-12 px-6 flex items-center justify-center">
-            <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-aurora bg-grid">
+            <div className="max-w-3xl w-full grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                {/* Left Column: Class Details */}
-                <div className="bg-white p-12 rounded-[2.5rem] shadow-comic border-2 border-ink text-center relative overflow-hidden flex flex-col justify-center">
-                    <div className="absolute top-0 left-0 w-full h-4 bg-soft-purple border-b-2 border-ink" />
+                {/* Left: Class Setup */}
+                <div className="card-glass p-8 flex flex-col justify-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
 
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-coral rounded-2xl border-2 border-ink shadow-comic-sm mb-6 -rotate-3 mx-auto">
-                        <Play className="w-10 h-10 text-white fill-current" />
+                    <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/20 flex items-center justify-center mb-6">
+                        <Play className="w-6 h-6 text-primary-light fill-current" />
                     </div>
 
-                    <h1 className="text-4xl font-extrabold text-ink mb-2">Teacher Console</h1>
-                    <p className="text-slate-500 font-bold text-lg mb-8">
-                        Setup your virtual classroom.
+                    <h1 className="text-2xl font-display font-bold text-text-primary mb-1">New Session</h1>
+                    <p className="text-text-muted text-sm mb-8">
+                        Set up your virtual classroom
                     </p>
 
-                    <div className="space-y-6 mb-8 text-left">
+                    <div className="space-y-5 mb-8">
                         <div>
-                            <label className="block font-extrabold text-ink mb-2 ml-1">Your Name</label>
+                            <label className="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Your Name</label>
                             <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                                 <input
                                     type="text"
                                     placeholder="e.g. Professor Oak"
                                     value={instructorName}
                                     onChange={(e) => setInstructorName(e.target.value)}
-                                    className="w-full pl-12 pr-6 py-4 rounded-xl border-2 border-ink font-bold text-lg outline-none focus:shadow-comic-sm transition-all bg-milk"
+                                    className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-bg-input border border-border text-text-primary placeholder-text-muted font-medium outline-none focus:border-primary/50 focus:shadow-glow-sm transition-all"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block font-extrabold text-ink mb-2 ml-1">Class Name</label>
+                            <label className="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Class Name</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Biology 101"
                                 value={roomName}
                                 onChange={(e) => setRoomName(e.target.value)}
-                                className="w-full px-6 py-4 rounded-xl border-2 border-ink font-bold text-lg outline-none focus:shadow-comic-sm transition-all bg-milk"
+                                className="w-full px-4 py-3.5 rounded-xl bg-bg-input border border-border text-text-primary placeholder-text-muted font-medium outline-none focus:border-primary/50 focus:shadow-glow-sm transition-all"
                             />
                         </div>
                     </div>
@@ -104,56 +103,54 @@ function TeacherIndexPage() {
                     <button
                         onClick={handleStartSession}
                         disabled={isCreating || !instructorName.trim()}
-                        className="w-full inline-flex items-center justify-center gap-3 px-8 py-5 bg-coral hover:bg-coral-dark disabled:opacity-50 text-white font-extrabold rounded-2xl shadow-comic text-xl border-2 border-ink btn-press"
+                        className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-xl text-base btn-press shadow-glow"
                     >
                         {isCreating ? (
                             <>
-                                <Loader2 className="w-6 h-6 animate-spin" />
-                                Starting Class...
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Starting...
                             </>
                         ) : (
                             <>
-                                <Play className="w-6 h-6 fill-current" />
+                                <Play className="w-5 h-5 fill-current" />
                                 Start Session
                             </>
                         )}
                     </button>
                 </div>
 
-                {/* Right Column: Avatar Editor (DiceBear) */}
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-comic border-2 border-ink text-center flex flex-col justify-center">
-                    <h2 className="text-2xl font-extrabold text-ink mb-6">Your Avatar</h2>
+                {/* Right: Avatar */}
+                <div className="card-glass p-8 flex flex-col justify-center items-center">
+                    <h2 className="text-lg font-display font-bold text-text-primary mb-6">Your Avatar</h2>
 
-                    <div className="bg-checkered rounded-2xl p-6 mb-6 inline-block mx-auto border-2 border-ink shadow-inner w-full max-w-[280px]">
+                    <div className="bg-bg-elevated rounded-2xl p-6 mb-6 w-full max-w-[260px] border border-border">
                         <AvatarPreview avatar={avatar} size="lg" />
                     </div>
 
-                    <div className="space-y-3 max-w-xs mx-auto w-full">
-                        {/* Style selector */}
-                        <div className="flex items-center justify-between bg-lavender-bg rounded-xl p-2 border-2 border-slate-200">
+                    <div className="space-y-3 w-full max-w-[260px]">
+                        <div className="flex items-center justify-between bg-bg-input rounded-xl p-2 border border-border">
                             <button
                                 onClick={() => cycleStyle(-1)}
-                                className="p-1 hover:bg-white rounded-lg transition-colors"
+                                className="p-1.5 hover:bg-bg-elevated rounded-lg transition-colors"
                             >
-                                <ChevronLeft className="w-5 h-5 text-slate-400" />
+                                <ChevronLeft className="w-4 h-4 text-text-muted" />
                             </button>
-                            <span className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                            <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary">
                                 {currentStyleLabel}
                             </span>
                             <button
                                 onClick={() => cycleStyle(1)}
-                                className="p-1 hover:bg-white rounded-lg transition-colors"
+                                className="p-1.5 hover:bg-bg-elevated rounded-lg transition-colors"
                             >
-                                <ChevronRight className="w-5 h-5 text-slate-400" />
+                                <ChevronRight className="w-4 h-4 text-text-muted" />
                             </button>
                         </div>
 
-                        {/* Shuffle button */}
                         <button
                             onClick={shuffleAvatar}
-                            className="w-full flex items-center justify-center gap-2 py-3 bg-mustard/20 hover:bg-mustard/40 text-ink font-extrabold rounded-xl border-2 border-slate-200 transition-colors btn-press"
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-bg-input hover:bg-bg-elevated text-text-secondary font-semibold rounded-xl border border-border transition-all btn-press text-sm"
                         >
-                            <Shuffle className="w-4 h-4" />
+                            <Shuffle className="w-3.5 h-3.5" />
                             Shuffle
                         </button>
                     </div>
