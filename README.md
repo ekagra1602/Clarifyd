@@ -12,9 +12,6 @@ Students can generate short explainer videos on demand during a lecture. Hit "Ge
 ### Live Quizzes + Leaderboard
 Teachers launch AI-generated quizzes from the live transcript with one click. Students answer in real time, earn streaks for consecutive correct answers, and climb the session leaderboard. Scores, streaks, and rankings update live.
 
-### Real-Time Transcription
-The teacher's mic streams audio through **AssemblyAI** with ~300ms latency. Students see every word appear as it's spoken — large, clean text that fades older lines so the current sentence always stands out.
-
 ### AI Q&A Chat
 Students open a chat overlay and ask anything about the lecture. The AI answers grounded in the live transcript and any uploaded course materials, so responses are always relevant to what's actually being taught. Teachers can review, approve, and add follow-ups to AI answers.
 
@@ -27,55 +24,4 @@ Teachers get a single-page command center: start/stop transcription, launch quiz
 ### Session Notes
 After a session, both teachers and students can download AI-generated markdown summary notes covering the key topics from the lecture.
 
----
 
-## Tech Stack
-
-| Layer | Tech |
-|-------|------|
-| Frontend | React 19, TanStack Router, Tailwind CSS 4, Framer Motion |
-| Backend | Convex (real-time database + serverless functions) |
-| AI | Google Gemini 2.5 Flash (Q&A, quizzes, summaries, prompt optimization) |
-| Video | Google Veo 3.1 (AI video generation) |
-| Speech-to-Text | AssemblyAI Universal Streaming v3 |
-| Compression | Token Company (prompt compression for long transcripts) |
-| Avatars | DiceBear API |
-| Hosting | Render |
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- [Convex](https://convex.dev) account
-- [Google AI Studio](https://aistudio.google.com) API key (Gemini + Veo)
-- [AssemblyAI](https://www.assemblyai.com) API key
-
-### Setup
-
-```bash
-bun install
-cp .env.example .env.local
-npm run dev
-```
-
-### Environment Variables
-
-**Frontend** (`.env.local`):
-
-| Variable | Description |
-|----------|-------------|
-| `VITE_CONVEX_URL` | Auto-set by `npx convex dev` |
-
-**Convex Backend** (set in [Dashboard](https://dashboard.convex.dev) > Settings > Environment Variables):
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `CLAUDE_API_KEY` | Yes | AI model API key |
-| `ASSEMBLYAI_API_KEY` | Yes | Speech-to-text |
-| `VEO_API_KEY` | Yes | Google AI key for Veo video generation |
-| `VEO_MODEL` | No | Veo model (default: `veo-3.1-fast-generate-preview`) |
-| `TRANSCRIPTION_SECRET` | Yes | `openssl rand -base64 32` |
-| `TOKEN_COMPANY_API_KEY` | No | Prompt compression |
-| `COMPRESSION_ENABLED` | No | `"false"` to disable |
